@@ -48,6 +48,40 @@ double LastXPos = -100000, LastYPos = -100000;
 void printVec3(const glm::vec3& vec) {
     std::cout << "vec3(" << vec.x << ", " << vec.y << ", " << vec.z << ")" << std::endl;
 }
+
+void objUpdate(GameObject *obj)
+{
+    if (isKeyPressed(Window, GLFW_KEY_Z) && isKeyPressed(Window, GLFW_KEY_LEFT_SHIFT))
+    {
+        obj->setRot(obj->getRot() + glm::vec3(0, 0, Speed * 40 * DeltaTime));
+    }
+    else if (isKeyPressed(Window, GLFW_KEY_Z))
+    {
+        obj->setScale(obj->getScale() + glm::vec3(0, 0, Speed * 1 * DeltaTime));
+    }
+
+    if (isKeyPressed(Window, GLFW_KEY_X) && isKeyPressed(Window, GLFW_KEY_LEFT_SHIFT))
+    {
+        obj->setRot(obj->getRot() + glm::vec3(Speed * 40 * DeltaTime, 0, 0));
+    }
+    else if (isKeyPressed(Window, GLFW_KEY_X))
+    {
+        obj->setScale(obj->getScale() + glm::vec3(Speed * 1 * DeltaTime, 0, 0));
+    }
+
+    if (isKeyPressed(Window, GLFW_KEY_Y) && isKeyPressed(Window, GLFW_KEY_LEFT_SHIFT))
+    {
+        obj->setRot(obj->getRot() + glm::vec3(0, Speed * 40 * DeltaTime, 0));
+    }
+    else if (isKeyPressed(Window, GLFW_KEY_Y))
+    {
+        obj->setScale(obj->getScale() + glm::vec3(0, Speed * 1 * DeltaTime, 0));
+    }
+    
+    
+    
+}
+
 void keyInput()
 {
     
@@ -252,14 +286,41 @@ int main()
     Shader DefaultShader("Shaders/vertexShaderDefault.glsl", "Shaders/fragmentShaderDefault.glsl");
     DEFAULT_SHADER_REFERENCE = &DefaultShader;
     GameObject obj = GameObject(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), vertices, sizeof(vertices), DEFAULT_SHADER_REFERENCE);
+    
+    obj.setUpdateFunc(&objUpdate);
 
     const char* paths[] =
     {
-    "TextureImages/wall.jpg",
-    "TextureImages/awesomeface.png"
+    "TextureImages/scene.jpg",
+    //"TextureImages/awesomeface.png"
     };
-    obj.setTextures(texture, sizeof(texture), paths, 2);
+    obj.setTextures(texture, sizeof(texture), paths, 1);
 
+    GameObject obj2 = GameObject(glm::vec3(2, 1, 0), glm::vec3(0, 0, 0), vertices, sizeof(vertices), DEFAULT_SHADER_REFERENCE);
+
+    const char* paths2[] =
+    {
+    "TextureImages/container.jpg",
+    };
+    obj2.setTextures(texture, sizeof(texture), paths2, 1);
+
+    GameObject obj3 = GameObject(glm::vec3(-1.5f, 0.5f, 0), glm::vec3(0, 0, 0), vertices, sizeof(vertices), DEFAULT_SHADER_REFERENCE);
+
+    const char* paths3[] =
+    {
+    "TextureImages/awesomeface.png",
+    };
+    obj3.setTextures(texture, sizeof(texture), paths3, 1);
+
+    GameObject obj4 = GameObject(glm::vec3(2.0f, -0.5f, 0), glm::vec3(0, 0, 0), vertices, sizeof(vertices), DEFAULT_SHADER_REFERENCE);
+
+    const char* paths4[] =
+    {
+    "TextureImages/awesomeface.pngs",
+    "TextureImages/container.jpg"
+
+    };
+    obj4.setTextures(texture, sizeof(texture), paths4, 2);
     glEnable(GL_DEPTH_TEST);
 
 
@@ -316,27 +377,56 @@ int main()
         (obj.shaderProgram)->setMat4("model", obj.getModelMatrix());
 
         printVec3(glm::fvec1(DeltaTime * 100)* obj.forward());
-        obj.setPos((glm::fvec1(DeltaTime * 1)*- obj.forward())+ obj.getPos());
+       // obj.setPos((glm::fvec1(DeltaTime * 1)*- obj.forward())+ obj.getPos());
 
-
-        if (isKeyPressed(Window, GLFW_KEY_Z))
-        {
-            obj.setRot(obj.getRot() + glm::vec3(0,0, Speed * 40 * DeltaTime));
-        }
-        if (isKeyPressed(Window, GLFW_KEY_X))
-        {
-            obj.setRot(obj.getRot() + glm::vec3(Speed * 40 * DeltaTime, 0, 0));
-        }
-        if (isKeyPressed(Window, GLFW_KEY_Y))
-        {
-            obj.setRot(obj.getRot() + glm::vec3(0, Speed * 40 * DeltaTime, 0));
-        }
+        obj.objUpdate();
+        
         glm::vec3 diff = (obj.getPos() - cameraInst.getPos());
-        if (diff.x + diff.y + diff.z < 0.5f)
+        /*if (glm::abs(diff.x) + glm::abs(diff.y) + glm::abs(diff.z) < 0.85f)
         {
             break;
-        }
+        }*/
         glDrawArrays(GL_TRIANGLES, 0, obj.verticesNum/3);
+        glBindVertexArray(0);
+
+        obj2.prepareRender();
+
+        (obj2.shaderProgram)->setMat4("projection", PROJECTION);
+
+        (obj2.shaderProgram)->setMat4("view", View);
+
+        (obj2.shaderProgram)->setMat4("model", obj2.getModelMatrix());
+
+
+
+        glDrawArrays(GL_TRIANGLES, 0, obj2.verticesNum / 3);
+        glBindVertexArray(0);
+
+        obj3.prepareRender();
+
+        (obj3.shaderProgram)->setMat4("projection", PROJECTION);
+
+        (obj3.shaderProgram)->setMat4("view", View);
+
+        (obj3.shaderProgram)->setMat4("model", obj3.getModelMatrix());
+
+
+
+        glDrawArrays(GL_TRIANGLES, 0, obj3.verticesNum / 3);
+        glBindVertexArray(0);
+        
+        obj4.prepareRender();
+
+        (obj4.shaderProgram)->setMat4("projection", PROJECTION);
+
+        (obj4.shaderProgram)->setMat4("view", View);
+
+        (obj4.shaderProgram)->setMat4("model", obj4.getModelMatrix());
+
+
+
+        glDrawArrays(GL_TRIANGLES, 0, obj4.verticesNum / 3);
+
 
         glBindVertexArray(0);
 

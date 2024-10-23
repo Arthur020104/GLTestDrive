@@ -77,7 +77,7 @@ void Camera::verticalRotation(const double& degrees)
 
 	aux = rotationMatrix * aux;
 	
-	if ((glm::normalize(cameraPos - glm::vec3(aux.x, aux.y, aux.z)).y >= 0.999 && aux.y <= targetPos.y) || (glm::normalize(cameraPos - glm::vec3(aux.x, aux.y, aux.z)).y <= -0.999 && aux.y >= targetPos.y))
+	if ((glm::normalize(cameraPos - glm::vec3(aux.x, aux.y, aux.z)).y >= 0.99 && aux.y <= targetPos.y) || (glm::normalize(cameraPos - glm::vec3(aux.x, aux.y, aux.z)).y <= -0.99 && aux.y >= targetPos.y))
 	{
 		return;
 	}

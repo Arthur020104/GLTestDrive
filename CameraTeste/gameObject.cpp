@@ -8,6 +8,7 @@
 #include <glm/glm/gtc/matrix_transform.hpp>
 #include <glm/glm/gtc/type_ptr.hpp>
 #include <algorithm>
+#include <functional>
 void generateTexture1(unsigned int& texture, const char* path)
 {
     int width, height, nrChannels;
@@ -145,8 +146,9 @@ glm::mat4 GameObject::getModelMatrix()
     objRotMat = glm::rotate(objRotMat, glm::radians(static_cast<float>(objRot.y)), glm::vec3(0.0f, 1.0f, 0.0f));//rotate around y
     objRotMat = glm::rotate(objRotMat, glm::radians(static_cast<float>(objRot.x)), glm::vec3(1.0f, 0.0f, 0.0f));//rotate around z
 
+    glm::mat4 objScaleMat = glm::scale(glm::mat4(1.0f), objScale);
     
-    return objPosMat * objRotMat;
+    return  objPosMat * objRotMat * objScaleMat;
 }
 glm::vec3 GameObject::getPos()
 {
@@ -155,6 +157,10 @@ glm::vec3 GameObject::getPos()
 glm::vec3 GameObject::getRot()
 {
     return objRot;
+}
+glm::vec3 GameObject::getScale()
+{
+    return objScale;
 }
 
 void GameObject::setPos(const glm::vec3& newPos)
@@ -165,6 +171,11 @@ void GameObject::setRot(const glm::vec3& newRot)
 {
     objRot = newRot;
 }
+void GameObject::setScale(const glm::vec3& newScale)
+{
+    objScale = newScale;
+}
+
 glm::vec3 GameObject::forward()
 {
     return glm::vec3(
@@ -173,5 +184,12 @@ glm::vec3 GameObject::forward()
         glm::cos(objRot.x) * glm::cos(objRot.y) 
     );
 }
-
+void GameObject::setUpdateFunc(std::function<void(GameObject*)> func)
+{
+    updateFunc = func;
+}
+void GameObject::objUpdate()
+{
+    updateFunc(this);
+}
 
