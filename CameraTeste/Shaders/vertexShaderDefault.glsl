@@ -15,5 +15,5 @@ void main()
     gl_Position = projection * view * model * vec4(Pos, 1.0);
     TextureCoord = TextCoord;
     NormalVectors = Normals;
-    myVertex = view * model * vec4(Pos, 1.0); 
+    myVertex = model * vec4(Pos, 1.0); 
 }

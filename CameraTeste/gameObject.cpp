@@ -214,7 +214,7 @@ void GameObject::recalculateWVectors()
 
     for (int i = 0; i < sizeOfLights; i++)
     {
-        wValues[i] = (glm::length(lightsArr[i].getW(pos)) > 0 || containsNaN(lightsArr[i].getW(pos)) )? lightsArr[i].getW(pos) : -pos;
+        wValues[i] = (glm::length(lightsArr[i].getPos()) > 0 || containsNaN(lightsArr[i].getPos()) )? lightsArr[i].getPos() : -pos;
         //std::cout << "global" << "\n";
        // printVec3(wValues[i]);
         //std::cout << "local" << "\n";
@@ -230,8 +230,8 @@ void GameObject::updateLighting(Light* l, const int& sizeOfLightArr)//should be 
     lightColors.clear();
     lightColors.reserve(sizeOfLights);
 
-    wValues.clear();
-    wValues.reserve(sizeOfLights);
+    lightPos.clear();
+    lightPos.reserve(sizeOfLights);
 
     lightIntensity.clear();
     lightIntensity.reserve(sizeOfLights);
@@ -240,7 +240,7 @@ void GameObject::updateLighting(Light* l, const int& sizeOfLightArr)//should be 
     lightModelMatrix.reserve(sizeOfLights);
 
     lightColors.resize(sizeOfLights);
-    wValues.resize(sizeOfLights);
+    lightPos.resize(sizeOfLights);
     lightIntensity.resize(sizeOfLights);
     lightModelMatrix.resize(sizeOfLights);
 
@@ -248,7 +248,7 @@ void GameObject::updateLighting(Light* l, const int& sizeOfLightArr)//should be 
 
     for (int i = 0; i < sizeOfLights; i++)
     {
-        wValues[i] = (glm::length(lightsArr[i].getW(pos)) > 0 || containsNaN(lightsArr[i].getW(pos))) ? lightsArr[i].getW(pos) : -pos;
+        lightPos[i] = (glm::length(lightsArr[i].getPos()) > 0 || containsNaN(lightsArr[i].getPos())) ? lightsArr[i].getPos() : -pos;
         lightColors[i] = lightsArr[i].getColor();
         lightIntensity[i] = lightsArr[i].getIntensity();
         lightModelMatrix[i] = glm::mat3(lightsArr[i].getModelMatrix());
@@ -273,7 +273,7 @@ void GameObject::applyLighting()
     /*This will be changed will be values of the scene not gameobject*/
     
     
-    shaderProgram->setArrayVec3("lightsWValues", &wValues[0], wValues.size());//deve ser passado para cada objeto no update do shader
+    shaderProgram->setArrayVec3("lightsPos", &lightPos[0], lightPos.size());//deve ser passado para cada objeto no update do shader
 
 
 }

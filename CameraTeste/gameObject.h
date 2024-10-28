@@ -57,7 +57,7 @@ private:
 
 	Light* lightsArr;
 	int sizeOfLights;
-	std::vector<glm::vec3> wValues;
+	std::vector<glm::vec3> lightPos;
 	/*This will be changed will be values of the scene not gameobject*/
 	std::vector<glm::vec3> lightColors;
 	std::vector<float> lightIntensity;

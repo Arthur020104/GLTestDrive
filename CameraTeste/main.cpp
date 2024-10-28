@@ -23,7 +23,7 @@ const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 720;
 
 const double NEAR_FRUSTUM = 0.1f;
-const double FAR_FRUSTUM = 10000.0f;
+const double FAR_FRUSTUM = 1000000000;
 
 GLFWwindow* Window;
 Shader* DEFAULT_SHADER_REFERENCE;
@@ -42,11 +42,11 @@ int const AMOUNT_OF_SAMPLES_TO_COUNT_FPS = 20000;
 
 glm::mat4 View;
 
-Camera cameraInst = Camera(glm::vec3(0,0,0), true);
+Camera cameraInst = Camera(glm::vec3(5,2,-3), true);
 Camera cameraInst2 = Camera(glm::vec3(0, 0, -50), glm::vec3(0, 0, 1), false);
 
 
-const glm::mat4 PROJECTION = glm::perspective(glm::radians(103.0f), (float)WIDTH / HEIGHT, 0.1f, 100.0f);
+const glm::mat4 PROJECTION = glm::perspective(glm::radians(103.0f), (float)WIDTH / HEIGHT, (float)NEAR_FRUSTUM, (float)FAR_FRUSTUM);
 
 double LastXPos = -100000, LastYPos = -100000;
 void printVec3(const glm::vec3& vec) {
@@ -61,7 +61,7 @@ void objUpdate(GameObject *obj)
     }
     else if (isKeyPressed(Window, GLFW_KEY_Z))
     {
-        obj->setScale(obj->getScale() + glm::vec3(0, 0, Speed * 1 * DeltaTime));
+        obj->setScale(obj->getScale() + glm::vec3(0, 0, Speed * DeltaTime));
     }
 
     if (isKeyPressed(Window, GLFW_KEY_X) && isKeyPressed(Window, GLFW_KEY_LEFT_SHIFT))
@@ -70,7 +70,7 @@ void objUpdate(GameObject *obj)
     }
     else if (isKeyPressed(Window, GLFW_KEY_X))
     {
-        obj->setScale(obj->getScale() + glm::vec3(Speed * 1 * DeltaTime, 0, 0));
+        obj->setScale(obj->getScale() + glm::vec3(Speed * DeltaTime, 0, 0));
     }
 
     if (isKeyPressed(Window, GLFW_KEY_Y) && isKeyPressed(Window, GLFW_KEY_LEFT_SHIFT))
@@ -79,9 +79,28 @@ void objUpdate(GameObject *obj)
     }
     else if (isKeyPressed(Window, GLFW_KEY_Y))
     {
-        obj->setScale(obj->getScale() + glm::vec3(0, Speed * 1 * DeltaTime, 0));
+        obj->setScale(obj->getScale() + glm::vec3(0, Speed * DeltaTime, 0));
     }
     
+    if (isKeyPressed(Window, GLFW_KEY_UP))
+    {
+        obj->setPos(obj->getPos() + glm::vec3(0,0, Speed * DeltaTime));
+    }
+
+    if (isKeyPressed(Window, GLFW_KEY_DOWN))
+    {
+        obj->setPos(obj->getPos() + glm::vec3(0, 0, -Speed * DeltaTime));
+    }
+
+    if (isKeyPressed(Window, GLFW_KEY_RIGHT))
+    {
+        obj->setPos(obj->getPos() + glm::vec3(Speed * DeltaTime, 0, 0));
+    }
+
+    if (isKeyPressed(Window, GLFW_KEY_LEFT))
+    {
+        obj->setPos(obj->getPos() + glm::vec3(-Speed * DeltaTime, 0, 0));
+    }
     
     
 }
@@ -123,7 +142,7 @@ void keyInput()
     }
     if (Speed <= DefaultSpeed && isKeyPressed(Window, GLFW_KEY_LEFT_SHIFT))
     {
-        Speed  = DefaultSpeed*4;
+        Speed  = DefaultSpeed*10;
     }
     else if (Speed <= DefaultSpeed && isKeyPressed(Window, GLFW_KEY_LEFT_CONTROL))
     {
@@ -151,6 +170,7 @@ void cameraMovement()
     cameraInst.verticalRotation(HorizontalSens * DeltaTime * (LastYPos - ypos));
     LastXPos = xpos; LastYPos = ypos;
 }
+
 int init(GLFWwindow** window)
 {
     if (!glfwInit())
@@ -292,16 +312,16 @@ int main()
         0.0f, 1.0f
     };
     Light lights[] = {
-        Light(glm::vec3(5, 0, 5), glm::vec3(0, 0, 0), glm::vec3(1.0, 1.0, 1.0), false, 2.0f),             // Bright white light
-        Light(glm::vec3(5, 3, -5), glm::vec3(0, 0, 0), glm::vec3(1,0, 1), false, 4.0f),           // Orange light
-        Light(glm::vec3(-30, 45, -20), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.8, 0.4), false, 1.5f),         // Warm light
-        Light(glm::vec3(25, -40, 15), glm::vec3(0, 0, 0), glm::vec3(0.9, 0.7, 0.5), false, 1.8f),          // Light orange
-        Light(glm::vec3(5, 3, 0), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.9, 0.6), false, 1.7f),          // Soft warm light
-        Light(glm::vec3(-20, -25, 35), glm::vec3(0, 0, 0), glm::vec3(0.95, 0.7, 0.3), false, 1.9f),        // Light orange
-        Light(glm::vec3(10, 30, -50), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.75, 0.2), false, 1.6f),         // Slightly orange
-        Light(glm::vec3(-50, 15, 10), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.85, 0.3), false, 1.4f),         // Light orange
-        Light(glm::vec3(40, -35, 20), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.6, 0.2), false, 1.8f),          // Warm orange
-        Light(glm::vec3(-45, -15, -30), glm::vec3(0, 0, 0), glm::vec3(0.9, 0.5, 0.1), false, 1.3f)         // Deeper orange
+      Light(glm::vec3(25, 5, -25), glm::vec3(0, 0, 0), glm::vec3(1, 0.65, 0), false, 25.0f),       
+     Light(glm::vec3(25, 5, -130), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0), false, 50.0f),
+    Light(glm::vec3(-10, 10, -10), glm::vec3(0, 0, 0), glm::vec3(0.8, 0.8, 1.0), false, 1.0f),  
+    Light(glm::vec3(10, 10, 10), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.8, 0.6), false, 1.0f),     
+    Light(glm::vec3(-5, 10, 0), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.7, 0.5), false, 1.0f),    
+    Light(glm::vec3(-10, 10, 10), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.5, 0.3), false, 1.9f),  
+    Light(glm::vec3(10, 10, -10), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.9, 0.7), false, 1.0f),    
+    Light(glm::vec3(-10, 10, 5), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.8, 0.6), false, 1.0f),     
+    Light(glm::vec3(25, 5, -105), glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), false, 30.3f),
+    Light(glm::vec3(25, 5, -70), glm::vec3(0, 0, 0), glm::vec3(1, 0, 0), false, 30.3f)
     };
 
     
@@ -312,7 +332,7 @@ int main()
     DEFAULT_SHADER_REFERENCE = &DefaultShader;
   //  (const glm::vec3& inicialPos, const glm::vec3& inicialRot, const glm::vec4& color, const float* vertices, unsigned long long int& sizeOfVertices, Shader* shaderProgramRef, const bool& isStatic) : TransformController(inicialPos, inicialRot)
 
-    GameObject teapot = GameObject(glm::vec3(5, 0, 0),  glm::vec3(0, 0, 180), glm::vec4(0.1, 0.1,0.1,1), teapotVertices, teapot_count, DEFAULT_SHADER_REFERENCE, false);
+    GameObject teapot = GameObject(glm::vec3(5, 0, 0),  glm::vec3(0, 0, 180), glm::vec4(1, 1,1,1), teapotVertices, teapot_count, DEFAULT_SHADER_REFERENCE, false);
     teapot.updateLighting(lights, 10);
     teapot.setUpdateFunc(&objUpdate);
 
@@ -385,16 +405,18 @@ int main()
     allObjects.push_back(&obj3);
     allObjects.push_back(&obj4);
     allObjects.push_back(&teapot);
+
+    
     //adicionando objetos para representarem as luzes
     for (int i = 0; i < 10; ++i)
     {
         Light& light = lights[i];
 
-        glm::vec4 objectColor = glm::vec4(light.getColor(), 1.0f);
+        glm::vec4 objectColor = glm::vec4(light.getColor()*glm::fvec1(light.getIntensity()*2), 1.0f);
 
         // Criando o GameObject na mesma posição da luz
         GameObject* object1 = new GameObject(light.getPos(), glm::vec3(0, 0, 0), objectColor, vertices, numVertices, DEFAULT_SHADER_REFERENCE, true);
-
+        object1->setScale(object1->getScale() * glm::fvec1(light.getIntensity()*0.25));
         object1->updateLighting(lights, 10);
         allObjects.push_back(object1);
     }
@@ -404,7 +426,7 @@ int main()
     {
         processInput(Window);
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         // glClear(GL_COLOR_BUFFER_BIT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
