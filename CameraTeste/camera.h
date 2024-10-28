@@ -4,6 +4,7 @@
 #include <glm/glm/gtc/matrix_transform.hpp>
 #include <glm/glm/gtc/type_ptr.hpp>
 #include "main.h"
+const glm::vec3 DEFAULT_TARGET = glm::vec3(0, 0, FAR_FRUSTUM);
 class Camera
 {
 public:
@@ -11,11 +12,11 @@ public:
 
 	Camera(glm::vec3 inicialPos, glm::vec3 target): Camera(inicialPos, target, false) {}
 
-	Camera(glm::vec3 inicialPos, bool isFpsCam) : Camera(inicialPos, glm::vec3(0,0, FAR_FRUSTUM), isFpsCam) {}
+	Camera(glm::vec3 inicialPos, bool isFpsCam) : Camera(inicialPos, DEFAULT_TARGET, isFpsCam) {}
 
-	Camera(glm::vec3 inicialPos): Camera(inicialPos, glm::vec3(0, 0, FAR_FRUSTUM), false) {}
+	Camera(glm::vec3 inicialPos): Camera(inicialPos, DEFAULT_TARGET, false) {}
 
-	Camera(): Camera(glm::vec3(0, 0, 6), glm::vec3(0, 0, FAR_FRUSTUM), false) {}
+	Camera(): Camera(glm::vec3(0, 0, 6), DEFAULT_TARGET, false) {}
 
 	glm::vec3 foward();
 

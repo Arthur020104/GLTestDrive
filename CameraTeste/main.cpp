@@ -38,11 +38,11 @@ float DefaultSpeed = 8.0f;
 float VerticalSens = 100.0f;
 float HorizontalSens = 100.0f;
 
-int const AMOUNT_OF_SAMPLES_TO_COUNT_FPS = 30;
+int const AMOUNT_OF_SAMPLES_TO_COUNT_FPS = 20000;
 
 glm::mat4 View;
 
-Camera cameraInst = Camera(glm::vec3(0,10,0), true);
+Camera cameraInst = Camera(glm::vec3(0,0,0), true);
 Camera cameraInst2 = Camera(glm::vec3(0, 0, -50), glm::vec3(0, 0, 1), false);
 
 
@@ -292,11 +292,11 @@ int main()
         0.0f, 1.0f
     };
     Light lights[] = {
-        Light(glm::vec3(0, 0, 50), glm::vec3(0, 0, 0), glm::vec3(1.0, 1.0, 1.0), false, 2.0f),             // Bright white light
-        Light(glm::vec3(0, 0, -50), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.647, 0.0), false, 2.0f),           // Orange light
+        Light(glm::vec3(5, 0, 5), glm::vec3(0, 0, 0), glm::vec3(1.0, 1.0, 1.0), false, 2.0f),             // Bright white light
+        Light(glm::vec3(5, 3, -5), glm::vec3(0, 0, 0), glm::vec3(1,0, 1), false, 4.0f),           // Orange light
         Light(glm::vec3(-30, 45, -20), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.8, 0.4), false, 1.5f),         // Warm light
         Light(glm::vec3(25, -40, 15), glm::vec3(0, 0, 0), glm::vec3(0.9, 0.7, 0.5), false, 1.8f),          // Light orange
-        Light(glm::vec3(35, 20, -45), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.9, 0.6), false, 1.7f),          // Soft warm light
+        Light(glm::vec3(5, 3, 0), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.9, 0.6), false, 1.7f),          // Soft warm light
         Light(glm::vec3(-20, -25, 35), glm::vec3(0, 0, 0), glm::vec3(0.95, 0.7, 0.3), false, 1.9f),        // Light orange
         Light(glm::vec3(10, 30, -50), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.75, 0.2), false, 1.6f),         // Slightly orange
         Light(glm::vec3(-50, 15, 10), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.85, 0.3), false, 1.4f),         // Light orange
@@ -304,12 +304,15 @@ int main()
         Light(glm::vec3(-45, -15, -30), glm::vec3(0, 0, 0), glm::vec3(0.9, 0.5, 0.1), false, 1.3f)         // Deeper orange
     };
 
+    
+
 
 
     Shader DefaultShader("Shaders/vertexShaderDefault.glsl", "Shaders/fragmentShaderDefault.glsl");
     DEFAULT_SHADER_REFERENCE = &DefaultShader;
   //  (const glm::vec3& inicialPos, const glm::vec3& inicialRot, const glm::vec4& color, const float* vertices, unsigned long long int& sizeOfVertices, Shader* shaderProgramRef, const bool& isStatic) : TransformController(inicialPos, inicialRot)
-    GameObject teapot = GameObject(glm::vec3(5, 0, 0), glm::vec3(0, 0, 180), teapotVertices, teapot_count, DEFAULT_SHADER_REFERENCE, false);
+
+    GameObject teapot = GameObject(glm::vec3(5, 0, 0),  glm::vec3(0, 0, 180), glm::vec4(0.1, 0.1,0.1,1), teapotVertices, teapot_count, DEFAULT_SHADER_REFERENCE, false);
     teapot.updateLighting(lights, 10);
     teapot.setUpdateFunc(&objUpdate);
 
@@ -344,7 +347,7 @@ int main()
     };
     obj2.setTextures(texture, sizeof(texture), paths2, 1);
 
-    GameObject obj3 = GameObject(glm::vec3(0, 0, -50), glm::vec3(0, 0, 0), vertices, numVertices, DEFAULT_SHADER_REFERENCE);
+    GameObject obj3 = GameObject(glm::vec3(0, 10, -50), glm::vec3(0, 0, 0), vertices, numVertices, DEFAULT_SHADER_REFERENCE);
     obj3.updateLighting(lights, 10);
 
     const char* paths3[] =
@@ -376,12 +379,25 @@ int main()
 
     // light teste2;
     std::vector<GameObject*> allObjects;
-    allObjects.reserve(5);
+    allObjects.reserve(15);
     allObjects.push_back(&obj);
     allObjects.push_back(&obj2);
     allObjects.push_back(&obj3);
     allObjects.push_back(&obj4);
     allObjects.push_back(&teapot);
+    //adicionando objetos para representarem as luzes
+    for (int i = 0; i < 10; ++i)
+    {
+        Light& light = lights[i];
+
+        glm::vec4 objectColor = glm::vec4(light.getColor(), 1.0f);
+
+        // Criando o GameObject na mesma posição da luz
+        GameObject* object1 = new GameObject(light.getPos(), glm::vec3(0, 0, 0), objectColor, vertices, numVertices, DEFAULT_SHADER_REFERENCE, true);
+
+        object1->updateLighting(lights, 10);
+        allObjects.push_back(object1);
+    }
 
     // Mean for every 2 frames with weights 0.8 and 0.2, with the newer frame being weighted higher.
     while (!glfwWindowShouldClose(Window))
@@ -403,7 +419,7 @@ int main()
         if (FpsSampleCounter >= AMOUNT_OF_SAMPLES_TO_COUNT_FPS)
         {
             FpsSampleCounter = 0;
-           // std::cout << "Fps: " << int(1 / DeltaTime) << "\n";
+            std::cout << "Fps: " << int(1 / DeltaTime) << "\n";
         }
 
         keyInput();
@@ -451,7 +467,10 @@ int main()
         glfwPollEvents();
 
     }
-
+    for (int i =5;i<15;i++)
+    {
+        delete(allObjects[i]);
+    }
 
     glfwTerminate();
     return 0;

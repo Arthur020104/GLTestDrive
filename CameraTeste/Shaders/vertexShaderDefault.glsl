@@ -9,9 +9,11 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
+out vec4 myVertex;
 void main()
 {
     gl_Position = projection * view * model * vec4(Pos, 1.0);
     TextureCoord = TextCoord;
     NormalVectors = Normals;
+    myVertex = view * model * vec4(Pos, 1.0); 
 }
