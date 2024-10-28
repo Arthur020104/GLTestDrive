@@ -10,16 +10,20 @@
 #include <glm/glm/gtc/matrix_transform.hpp>
 #include <glm/glm/gtc/type_ptr.hpp>
 #include "gameObject.h"
+#include "light.h"
 #include <iostream>
+#include "teapot.h"
 //Callback function for when window is resized
 //Funcao de callback para quando a janela eh resized(redimensionada)
+
+
 
 double DeltaTime = 0;
 const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 720;
 
 const double NEAR_FRUSTUM = 0.1f;
-const double FAR_FRUSTUM = 100.0f;
+const double FAR_FRUSTUM = 10000.0f;
 
 GLFWwindow* Window;
 Shader* DEFAULT_SHADER_REFERENCE;
@@ -38,8 +42,8 @@ int const AMOUNT_OF_SAMPLES_TO_COUNT_FPS = 30;
 
 glm::mat4 View;
 
-Camera cameraInst = Camera(glm::vec3(0,0,-6), true);
-
+Camera cameraInst = Camera(glm::vec3(0,10,0), true);
+Camera cameraInst2 = Camera(glm::vec3(0, 0, -50), glm::vec3(0, 0, 1), false);
 
 
 const glm::mat4 PROJECTION = glm::perspective(glm::radians(103.0f), (float)WIDTH / HEIGHT, 0.1f, 100.0f);
@@ -119,7 +123,12 @@ void keyInput()
     }
     if (Speed <= DefaultSpeed && isKeyPressed(Window, GLFW_KEY_LEFT_SHIFT))
     {
-        Speed *= 4;
+        Speed  = DefaultSpeed*4;
+    }
+    else if (Speed <= DefaultSpeed && isKeyPressed(Window, GLFW_KEY_LEFT_CONTROL))
+    {
+        Speed = DefaultSpeed * 0.25;
+
     }
     else
     {
@@ -150,8 +159,8 @@ int init(GLFWwindow** window)
         glfwTerminate();
         return -1;
     }
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /*Telling GLFW we want to use the core-profile means we'll get access to a smaller subset of OpenGL features without backwards-compatible features we no longer need    Mac OS X you need to add glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); to your initialization code for it to work*/
@@ -282,12 +291,41 @@ int main()
         0.0f, 0.0f,
         0.0f, 1.0f
     };
-    
+    Light lights[] = {
+        Light(glm::vec3(0, 0, 50), glm::vec3(0, 0, 0), glm::vec3(1.0, 1.0, 1.0), false, 2.0f),             // Bright white light
+        Light(glm::vec3(0, 0, -50), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.647, 0.0), false, 2.0f),           // Orange light
+        Light(glm::vec3(-30, 45, -20), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.8, 0.4), false, 1.5f),         // Warm light
+        Light(glm::vec3(25, -40, 15), glm::vec3(0, 0, 0), glm::vec3(0.9, 0.7, 0.5), false, 1.8f),          // Light orange
+        Light(glm::vec3(35, 20, -45), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.9, 0.6), false, 1.7f),          // Soft warm light
+        Light(glm::vec3(-20, -25, 35), glm::vec3(0, 0, 0), glm::vec3(0.95, 0.7, 0.3), false, 1.9f),        // Light orange
+        Light(glm::vec3(10, 30, -50), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.75, 0.2), false, 1.6f),         // Slightly orange
+        Light(glm::vec3(-50, 15, 10), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.85, 0.3), false, 1.4f),         // Light orange
+        Light(glm::vec3(40, -35, 20), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.6, 0.2), false, 1.8f),          // Warm orange
+        Light(glm::vec3(-45, -15, -30), glm::vec3(0, 0, 0), glm::vec3(0.9, 0.5, 0.1), false, 1.3f)         // Deeper orange
+    };
+
+
+
     Shader DefaultShader("Shaders/vertexShaderDefault.glsl", "Shaders/fragmentShaderDefault.glsl");
     DEFAULT_SHADER_REFERENCE = &DefaultShader;
-    GameObject obj = GameObject(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), vertices, sizeof(vertices), DEFAULT_SHADER_REFERENCE);
-    
-    obj.setUpdateFunc(&objUpdate);
+  //  (const glm::vec3& inicialPos, const glm::vec3& inicialRot, const glm::vec4& color, const float* vertices, unsigned long long int& sizeOfVertices, Shader* shaderProgramRef, const bool& isStatic) : TransformController(inicialPos, inicialRot)
+    GameObject teapot = GameObject(glm::vec3(5, 0, 0), glm::vec3(0, 0, 180), teapotVertices, teapot_count, DEFAULT_SHADER_REFERENCE, false);
+    teapot.updateLighting(lights, 10);
+    teapot.setUpdateFunc(&objUpdate);
+
+    /*const char* paths12[] =
+    {
+    "TextureImages/scene.jpg",
+    //"TextureImages/awesomeface.png"
+    };
+
+    teapot.setTextures(texture, sizeof(texture), paths12, 1);*/
+    const int numVertices = sizeof(vertices) / sizeof(vertices[0]);
+    GameObject obj = GameObject(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), vertices, numVertices, DEFAULT_SHADER_REFERENCE, false);
+
+    obj.updateLighting(lights, 10);
+
+   // obj.setUpdateFunc(&objUpdate);
 
     const char* paths[] =
     {
@@ -296,7 +334,9 @@ int main()
     };
     obj.setTextures(texture, sizeof(texture), paths, 1);
 
-    GameObject obj2 = GameObject(glm::vec3(2, 1, 0), glm::vec3(0, 0, 0), vertices, sizeof(vertices), DEFAULT_SHADER_REFERENCE);
+    GameObject obj2 = GameObject(glm::vec3(2, 1, 0), glm::vec3(0, 0, 0), vertices, numVertices, DEFAULT_SHADER_REFERENCE, false);
+
+    obj2.updateLighting(lights, 10);
 
     const char* paths2[] =
     {
@@ -304,7 +344,8 @@ int main()
     };
     obj2.setTextures(texture, sizeof(texture), paths2, 1);
 
-    GameObject obj3 = GameObject(glm::vec3(-1.5f, 0.5f, 0), glm::vec3(0, 0, 0), vertices, sizeof(vertices), DEFAULT_SHADER_REFERENCE);
+    GameObject obj3 = GameObject(glm::vec3(0, 0, -50), glm::vec3(0, 0, 0), vertices, numVertices, DEFAULT_SHADER_REFERENCE);
+    obj3.updateLighting(lights, 10);
 
     const char* paths3[] =
     {
@@ -312,40 +353,44 @@ int main()
     };
     obj3.setTextures(texture, sizeof(texture), paths3, 1);
 
-    GameObject obj4 = GameObject(glm::vec3(2.0f, -0.5f, 0), glm::vec3(0, 0, 0), vertices, sizeof(vertices), DEFAULT_SHADER_REFERENCE);
-
+    GameObject obj4 = GameObject(glm::vec3(2.0f, -0.5f, 0), glm::vec3(0, 0, 0), vertices, numVertices, DEFAULT_SHADER_REFERENCE);
+    obj4.updateLighting(lights, 10);
     const char* paths4[] =
     {
     "TextureImages/awesomeface.pngs",
-    "TextureImages/container.jpg"
+    "TextureImages/container.jpg",
+    "TextureImages/wall.jpg"
 
     };
-    obj4.setTextures(texture, sizeof(texture), paths4, 2);
+    obj4.setTextures(texture, sizeof(texture), paths4, 3);
+
+
     glEnable(GL_DEPTH_TEST);
 
 
-
+    bool isOnDefaultCam = true;
 
     int FpsSampleCounter = 0;
     double DeltatimeMean = 0;
+
+
+    // light teste2;
+    std::vector<GameObject*> allObjects;
+    allObjects.reserve(5);
+    allObjects.push_back(&obj);
+    allObjects.push_back(&obj2);
+    allObjects.push_back(&obj3);
+    allObjects.push_back(&obj4);
+    allObjects.push_back(&teapot);
+
     // Mean for every 2 frames with weights 0.8 and 0.2, with the newer frame being weighted higher.
     while (!glfwWindowShouldClose(Window))
     {
         processInput(Window);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        // glClear(GL_COLOR_BUFFER_BIT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, Texture1);
-
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, Texture2);
-
-
 
         double timeValue = glfwGetTime();
         DeltaTime = timeValue - LastTime;
@@ -363,72 +408,42 @@ int main()
 
         keyInput();
         cameraMovement();
-
-        View = cameraInst.getViewMatrix();
-
-
-
-        obj.prepareRender();
-
-        (obj.shaderProgram)->setMat4("projection", PROJECTION);
-
-        (obj.shaderProgram)->setMat4("view", View);
-
-        (obj.shaderProgram)->setMat4("model", obj.getModelMatrix());
-
-        printVec3(glm::fvec1(DeltaTime * 100)* obj.forward());
-       // obj.setPos((glm::fvec1(DeltaTime * 1)*- obj.forward())+ obj.getPos());
-
-        obj.objUpdate();
-        
-        glm::vec3 diff = (obj.getPos() - cameraInst.getPos());
-        /*if (glm::abs(diff.x) + glm::abs(diff.y) + glm::abs(diff.z) < 0.85f)
+        if (isKeyPressed(Window, GLFW_KEY_C) && isKeyPressed(Window, GLFW_KEY_LEFT_SHIFT))
         {
-            break;
-        }*/
-        glDrawArrays(GL_TRIANGLES, 0, obj.verticesNum/3);
-        glBindVertexArray(0);
+            isOnDefaultCam = true;
+        }
+        else if (isKeyPressed(Window, GLFW_KEY_C))
+        {
+            isOnDefaultCam = false;
+        }
 
-        obj2.prepareRender();
+ /*       if (isKeyPressed(Window, GLFW_KEY_1))
+        {
+            teste.position.y += DeltaTime * Speed / 2;
+        }
+        else if (isKeyPressed(Window, GLFW_KEY_0))
+        {
+            teste.position.y += DeltaTime * -Speed / 2;
+        }
+        */
+        if (isOnDefaultCam)
+        {
+            View = cameraInst.getViewMatrix();
+        }
+        else
+        {
+            View = cameraInst2.getViewMatrix();
+        }
 
-        (obj2.shaderProgram)->setMat4("projection", PROJECTION);
+        for (GameObject* objeto : allObjects)
+        {
+            objeto->objUpdate();
+            
+            objeto->prepareRender(View, PROJECTION);
 
-        (obj2.shaderProgram)->setMat4("view", View);
-
-        (obj2.shaderProgram)->setMat4("model", obj2.getModelMatrix());
-
-
-
-        glDrawArrays(GL_TRIANGLES, 0, obj2.verticesNum / 3);
-        glBindVertexArray(0);
-
-        obj3.prepareRender();
-
-        (obj3.shaderProgram)->setMat4("projection", PROJECTION);
-
-        (obj3.shaderProgram)->setMat4("view", View);
-
-        (obj3.shaderProgram)->setMat4("model", obj3.getModelMatrix());
-
-
-
-        glDrawArrays(GL_TRIANGLES, 0, obj3.verticesNum / 3);
-        glBindVertexArray(0);
-        
-        obj4.prepareRender();
-
-        (obj4.shaderProgram)->setMat4("projection", PROJECTION);
-
-        (obj4.shaderProgram)->setMat4("view", View);
-
-        (obj4.shaderProgram)->setMat4("model", obj4.getModelMatrix());
-
-
-
-        glDrawArrays(GL_TRIANGLES, 0, obj4.verticesNum / 3);
-
-
-        glBindVertexArray(0);
+            glDrawArrays(GL_TRIANGLES, 0, objeto->verticesNum / 3);
+            glBindVertexArray(0);
+        }
 
 
 
