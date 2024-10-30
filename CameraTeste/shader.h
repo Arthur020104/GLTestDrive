@@ -22,6 +22,7 @@ public:
 	void setFloatArray(const std::string&name, const float* arr, const int& sizeArr);
 	void setIntArray(const std::string& name, const int* arr, const int& size);
 	void setArrayVec3(const std::string& name, const glm::vec3* value, const int& size);
+	void setArrayVec4(const std::string& name, const glm::vec4* value, const int& size);
 	void setMat3(const std::string& name, const  glm::mat3& value);
 	void setArrayMat3(const std::string& name, const glm::mat3* value, const int& size);
 private:
