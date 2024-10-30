@@ -1,20 +1,32 @@
 #pragma once
-#include <glad/glad.h>
+
+// Implementação da biblioteca STB para carregar imagens
+#define STB_IMAGE_IMPLEMENTATION
 #include "Libs/stb_image.h"
-#include "transformController.h"
-#include "shader.h"
-#include <iostream>
-#include "gameObject.h"
+
+// Bibliotecas OpenGL e GLM
+#include <glad/glad.h>
 #include <glm/glm/glm.hpp>
 #include <glm/glm/gtc/matrix_transform.hpp>
 #include <glm/glm/gtc/type_ptr.hpp>
+#include <glm/glm/gtx/string_cast.hpp>
+
+// Bibliotecas do projeto
+#include "transformController.h"
+#include "shader.h"
+#include "gameObject.h"
+#include "main.h"
+
+// Bibliotecas padrão C++
+#include <stdexcept>
+#include <iostream>
+#include <string>
+#include <vector>
 #include <algorithm>
 #include <functional>
-#include "main.h"
-#include <glm/glm/gtx/string_cast.hpp>
-#include <set>
 
-void generateTexture1(unsigned int& texture, const char* path)
+
+void generateTexture(unsigned int& texture, const char* path)
 {
     int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(true);
@@ -44,9 +56,8 @@ void generateTexture1(unsigned int& texture, const char* path)
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-GameObject::GameObject(const glm::vec3& inicialPos, const glm::vec3& inicialRot, const glm::vec4& color, const float* vertices, const int& numVertices, Shader* shaderProgramRef, const bool& isStatic) : TransformController(inicialPos, inicialRot)
+GameObject::GameObject(const glm::vec3& inicialPos, const glm::vec3& inicialRot, const float* vertices, const int& numVertices, Shader* shaderProgramRef, const bool& isStatic) : TransformController(inicialPos, inicialRot)
 {
-    objectColor = color;
 
     shaderProgram = shaderProgramRef;
     isStaticObj = isStatic;
@@ -100,10 +111,18 @@ GameObject::~GameObject()
     }
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    delete[] verticesObj;
+    if (verticesObj)
+    {
+        delete[] verticesObj;
+        verticesObj = nullptr;
+        verticesNum = -1;
+    }
+    
 }
 void GameObject::setTextures(const float* textureCoords, const int& sizeOftextureCoords, const char** paths, const int& numberOfTextures)
 {
+    this->mustHaveRenderAtribb("setTextures");
+
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
@@ -144,7 +163,7 @@ void GameObject::setTextures(const float* textureCoords, const int& sizeOftextur
     for (int i = 0; i < numberOfTextures; i++)
     {
         unsigned int texturesId;
-        generateTexture1(texturesId, paths[i]);
+        generateTexture(texturesId, paths[i]);
      
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, texturesId);
@@ -164,22 +183,19 @@ void GameObject::setTextures(const float* textureCoords, const int& sizeOftextur
    
     glBindVertexArray(0);
 }
-void GameObject::prepareRender(glm::mat4& view, const glm::mat4& projection)
+void GameObject::prepareRender()
 {
-    shaderProgram->use();
+    this->mustHaveRenderAtribb("prepareRender");
 
-    this->shaderProgram->setMat4("projection", projection);
-    this->shaderProgram->setMat4("view", view);
+    shaderProgram->use();
 
     glm::mat4 model = this->getModelMatrix();
     this->shaderProgram->setMat4("model", model);
 
     this->shaderProgram->setMat3("model3", glm::mat3(model));
-    this->shaderProgram->setMat3("view3", glm::mat3(view));
 
-    shaderProgram->setVec4("color", objectColor);
+    shaderProgram->setVec4("color", glm::vec4(1,1,1,1));
 
-    this->applyLighting();
 
     for (int i = 0; i < texturesIds.size(); i++)
     {
@@ -203,90 +219,12 @@ void GameObject::objUpdate()
 bool containsNaN(const glm::vec3& vec) 
 {
     return std::isnan(vec.x) || std::isnan(vec.y) || std::isnan(vec.z);
-}/*
-void GameObject::recalculateWVectors()
-{
-    wValues.clear();
-    wValues.reserve(sizeOfLights);
-    wValues.resize(sizeOfLights);
-    
-    glm::vec3 pos = this->getPos();
-
-    for (int i = 0; i < sizeOfLights; i++)
-    {
-        wValues[i] = (glm::length(lightsArr[i].getPos()) > 0 || containsNaN(lightsArr[i].getPos()) )? lightsArr[i].getPos() : -pos;
-        //std::cout << "global" << "\n";
-       // printVec3(wValues[i]);
-        //std::cout << "local" << "\n";
-        //printVec3(lightsArr[i].getW(getPos()));
-    }
-}*/
-void GameObject::updateLighting(Light* l, const int& sizeOfLightArr)//should be done by the scene and just kepp the w vector
-{
-    // Store the light array and size
-    lightsArr = l;
-    sizeOfLights = sizeOfLightArr;
-
-    lightColors.clear();
-    lightColors.reserve(sizeOfLights);
-
-    lightPos.clear();
-    lightPos.reserve(sizeOfLights);
-
-    lightIntensity.clear();
-    lightIntensity.reserve(sizeOfLights);
-
-    lightModelMatrix.clear();
-    lightModelMatrix.reserve(sizeOfLights);
-
-    lightColors.resize(sizeOfLights);
-    lightPos.resize(sizeOfLights);
-    lightIntensity.resize(sizeOfLights);
-    lightModelMatrix.resize(sizeOfLights);
-
-    glm::vec3 pos = this->getPos();
-
-    for (int i = 0; i < sizeOfLights; i++)
-    {
-        lightPos[i] = (glm::length(lightsArr[i].getPos()) > 0 || containsNaN(lightsArr[i].getPos())) ? lightsArr[i].getPos() : -pos;
-        lightColors[i] = lightsArr[i].getColor();
-        lightIntensity[i] = lightsArr[i].getIntensity();
-        lightModelMatrix[i] = glm::mat3(lightsArr[i].getModelMatrix());
-    }
 }
 
-
-
-void GameObject::applyLighting()
-{
-    shaderProgram->use();
-    /*This will be changed will be values of the scene not gameobject*/
-    shaderProgram->setInt("numberOfLights", sizeOfLights); //deve ser passado apenas uma vez para shader 
-    
-
-    shaderProgram->setFloatArray("lightIntensity", &lightIntensity[0], lightIntensity.size()); //deve ser passado apenas uma vez para shader
-
-    shaderProgram->setArrayVec3("lightsColorValues", &lightColors[0], lightColors.size()); //deve ser passado apenas uma vez para shader
-
-
-    shaderProgram->setArrayMat3("lightModelMat", &lightModelMatrix[0], lightModelMatrix.size());
-    /*This will be changed will be values of the scene not gameobject*/
-    
-    
-    shaderProgram->setArrayVec3("lightsPos", &lightPos[0], lightPos.size());//deve ser passado para cada objeto no update do shader
-
-
-}
-struct Vec3Compare {
-    bool operator()(const glm::vec3& a, const glm::vec3& b) const {
-        if (a.x != b.x) return a.x < b.x;
-        if (a.y != b.y) return a.y < b.y;
-        return a.z < b.z;
-    }
-};
 
 void GameObject::updateNormals()
 {
+    this->mustHaveRenderAtribb("updateNormals");
     std::fill(vertexNormals.begin(), vertexNormals.end(), 0.0f); // Reset normals
 
     // Interior point for the object (assuming the object is centered at the origin)
@@ -345,4 +283,35 @@ void GameObject::updateNormals()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferSubData(GL_ARRAY_BUFFER, sizeOfVerticesObj, vertexNormals.size() * sizeof(float), &vertexNormals[0]);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+bool GameObject::hasVertices()
+{
+    if (verticesNum == -1)
+        return false;
+
+    return true;
+}
+
+void GameObject::mustHaveRenderAtribb(std::string methodName)
+{
+    if (!hasVertices())
+    {
+        throw std::runtime_error("[ERROR] GameObject must have vertices when executing the method: " + methodName);
+    }
+
+    if (shaderProgram == nullptr)
+    {
+        throw std::runtime_error("[ERROR] GameObject must have shaderProgram when executing the method: " + methodName);
+    }
+}
+
+int GameObject::getVerticesNum()
+{
+    return verticesNum;
+}
+
+Shader* GameObject::getShaderPointer() const
+{
+    return shaderProgram;
 }
