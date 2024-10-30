@@ -1,56 +1,66 @@
-
 #pragma once
+
+// Bibliotecas OpenGL e GLM
 #include <glad/glad.h>
-#include "main.h"
-#include "shader.h"
-#include "input.h"
-#include "shapes.h"
-#include "camera.h"
 #include <glm/glm/glm.hpp>
 #include <glm/glm/gtc/matrix_transform.hpp>
 #include <glm/glm/gtc/type_ptr.hpp>
+
+// Bibliotecas do projeto
 #include "gameObject.h"
+#include "main.h"
+#include "shader.h"
+#include "input.h"
+#include "camera.h"
 #include "light.h"
-#include <iostream>
 #include "teapot.h"
-//Callback function for when window is resized
-//Funcao de callback para quando a janela eh resized(redimensionada)
+#include "scene.h"
 
+// Outras bibliotecas
+#include <iostream>
+#include <memory>
 
-
-double DeltaTime = 0;
+// Constantes de tempo e janela
 const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 720;
-
 const double NEAR_FRUSTUM = 0.1f;
 const double FAR_FRUSTUM = 1000000000;
+const int AMOUNT_OF_SAMPLES_TO_COUNT_FPS = 20000;
+const glm::mat4 PROJECTION = glm::perspective(glm::radians(103.0f), (float)WIDTH / HEIGHT, (float)NEAR_FRUSTUM, (float)FAR_FRUSTUM);
 
-GLFWwindow* Window;
-Shader* DEFAULT_SHADER_REFERENCE;
-
-unsigned int VBO, VAO, EBO, VBO1, VAO1, EBO1;
-unsigned int Texture1, Texture2;
-
+// Variáveis de tempo
+double DeltaTime = 0;
 double LastTime = 0;
 
+// Variáveis de controle de posição do mouse
+double LastXPos = -100000, LastYPos = -100000;
+
+// Variáveis de sensibilidade de movimento
 float Speed = 8.0f;
 float DefaultSpeed = 8.0f;
 float VerticalSens = 100.0f;
 float HorizontalSens = 100.0f;
 
-int const AMOUNT_OF_SAMPLES_TO_COUNT_FPS = 20000;
+// Janela e shaders
+GLFWwindow* Window;
+Shader* DEFAULT_SHADER_REFERENCE;
 
+// Buffers e texturas
+unsigned int VBO, VAO, EBO, VBO1, VAO1, EBO1;
+unsigned int Texture1, Texture2;
+
+// Câmeras
+Camera cameraInst = Camera(glm::vec3(5, 2, -3), true);
+
+// Matrizes de visualização
 glm::mat4 View;
 
-Camera cameraInst = Camera(glm::vec3(5,2,-3), true);
-Camera cameraInst2 = Camera(glm::vec3(0, 0, -50), glm::vec3(0, 0, 1), false);
 
-
-const glm::mat4 PROJECTION = glm::perspective(glm::radians(103.0f), (float)WIDTH / HEIGHT, (float)NEAR_FRUSTUM, (float)FAR_FRUSTUM);
-
-double LastXPos = -100000, LastYPos = -100000;
-void printVec3(const glm::vec3& vec) {
-    std::cout << "vec3(" << vec.x << ", " << vec.y << ", " << vec.z << ")" << std::endl;
+int FpsSampleCounter = 0;
+double DeltatimeMean = 0;
+void printVec3(const glm::vec3& vec) 
+{
+    std::cout << "vec3(" << vec.x << ", " << vec.y << ", " << vec.z << ")" << "\n";
 }
 
 void objUpdate(GameObject *obj)
@@ -210,6 +220,7 @@ int init(GLFWwindow** window)
     /*******************Set GLAD********************/
 
     glViewport(0, 0, WIDTH, HEIGHT);
+    glEnable(GL_DEPTH_TEST);
     return 0;
 }
 /*******************/
@@ -311,177 +322,63 @@ int main()
         0.0f, 0.0f,
         0.0f, 1.0f
     };
-    Light lights[] = {
-      Light(glm::vec3(25, 5, -25), glm::vec3(0, 0, 0), glm::vec3(1, 0.65, 0), false, 25.0f),       
-     Light(glm::vec3(25, 5, -130), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0), false, 50.0f),
-    Light(glm::vec3(-10, 10, -10), glm::vec3(0, 0, 0), glm::vec3(0.8, 0.8, 1.0), false, 1.0f),  
-    Light(glm::vec3(10, 10, 10), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.8, 0.6), false, 1.0f),     
-    Light(glm::vec3(-5, 10, 0), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.7, 0.5), false, 1.0f),    
-    Light(glm::vec3(-10, 10, 10), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.5, 0.3), false, 1.9f),  
-    Light(glm::vec3(10, 10, -10), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.9, 0.7), false, 1.0f),    
-    Light(glm::vec3(-10, 10, 5), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.8, 0.6), false, 1.0f),     
-    Light(glm::vec3(25, 5, -105), glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), false, 30.3f),
-    Light(glm::vec3(25, 5, -70), glm::vec3(0, 0, 0), glm::vec3(1, 0, 0), false, 30.3f)
-    };
-
     
-
-
 
     Shader DefaultShader("Shaders/vertexShaderDefault.glsl", "Shaders/fragmentShaderDefault.glsl");
     DEFAULT_SHADER_REFERENCE = &DefaultShader;
-  //  (const glm::vec3& inicialPos, const glm::vec3& inicialRot, const glm::vec4& color, const float* vertices, unsigned long long int& sizeOfVertices, Shader* shaderProgramRef, const bool& isStatic) : TransformController(inicialPos, inicialRot)
+    const int numVertices = sizeof(vertices) / sizeof(vertices[0]);
 
-    GameObject teapot = GameObject(glm::vec3(5, 0, 0),  glm::vec3(0, 0, 180), glm::vec4(1, 1,1,1), teapotVertices, teapot_count, DEFAULT_SHADER_REFERENCE, false);
-    teapot.updateLighting(lights, 10);
+
+    #pragma region Lights
+    Light l1 = Light(glm::vec3(25, 5, -25), glm::vec3(0, 0, 0), glm::vec3(1, 0.65, 0.011), false, 25.0f);
+    Light l2 = Light(glm::vec3(25, 5, -130), glm::vec3(0, 0, 0), glm::vec3(0.011, 1, 0.011), false, 50.0f);
+    Light l3 = Light(glm::vec3(-10, 10, -10), glm::vec3(0, 0, 0), glm::vec3(0.8, 0.8, 1.0), false, 1.0f);
+    Light l4 = Light(glm::vec3(10, 10, 10), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.8, 0.6), false, 1.0f);
+    Light l5 = Light(glm::vec3(-130, 5, -100), glm::vec3(0, 0, 0), glm::vec3(0.5, 0.11, 0.8), false, 590.0f);
+    Light l6 = Light(glm::vec3(-10, 10, 10), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.5, 0.3), false, 1.9f);
+    Light l7 = Light(glm::vec3(0, 820, -50), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.9, 0.7), false, 000.0f);
+    Light l8 = Light(glm::vec3(-10, 10, 5), glm::vec3(0, 0, 0), glm::vec3(1.0, 0.8, 0.6), false, 1.0f);
+    Light l9 = Light(glm::vec3(25, 5, -105), glm::vec3(0, 0, 0), glm::vec3(0.011, 0.011, 1), false, 30.3f);
+    Light l10 = Light(glm::vec3(25, 5, -70), glm::vec3(0, 0, 0), glm::vec3(1, 0.011, 0.011), false, 30.3f);
+    Light* lights[10] = { &l1, &l2, &l3, &l4, &l5,&l6,&l7,&l8,&l9,&l10 };
+    #pragma endregion
+
+    #pragma region GameObjects
+    GameObject obj = GameObject(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), vertices, numVertices, &DefaultShader, true);
+
+    const char* paths[] = { "TextureImages/scene.jpg" };
+    obj.setTextures(texture, sizeof(texture) , paths, 1);
+
+    GameObject teapot = GameObject(glm::vec3(5, 0, 0), glm::vec3(0, 0, 180), teapotVertices, teapot_count, DEFAULT_SHADER_REFERENCE, false);
     teapot.setUpdateFunc(&objUpdate);
 
-    /*const char* paths12[] =
-    {
-    "TextureImages/scene.jpg",
-    //"TextureImages/awesomeface.png"
-    };
-
-    teapot.setTextures(texture, sizeof(texture), paths12, 1);*/
-    const int numVertices = sizeof(vertices) / sizeof(vertices[0]);
-    GameObject obj = GameObject(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), vertices, numVertices, DEFAULT_SHADER_REFERENCE, false);
-
-    obj.updateLighting(lights, 10);
-
-   // obj.setUpdateFunc(&objUpdate);
-
-    const char* paths[] =
-    {
-    "TextureImages/scene.jpg",
-    //"TextureImages/awesomeface.png"
-    };
-    obj.setTextures(texture, sizeof(texture), paths, 1);
-
-    GameObject obj2 = GameObject(glm::vec3(2, 1, 0), glm::vec3(0, 0, 0), vertices, numVertices, DEFAULT_SHADER_REFERENCE, false);
-
-    obj2.updateLighting(lights, 10);
-
-    const char* paths2[] =
-    {
-    "TextureImages/container.jpg",
-    };
-    obj2.setTextures(texture, sizeof(texture), paths2, 1);
-
-    GameObject obj3 = GameObject(glm::vec3(0, 10, -50), glm::vec3(0, 0, 0), vertices, numVertices, DEFAULT_SHADER_REFERENCE);
-    obj3.updateLighting(lights, 10);
-
-    const char* paths3[] =
-    {
-    "TextureImages/awesomeface.png",
-    };
-    obj3.setTextures(texture, sizeof(texture), paths3, 1);
-
-    GameObject obj4 = GameObject(glm::vec3(2.0f, -0.5f, 0), glm::vec3(0, 0, 0), vertices, numVertices, DEFAULT_SHADER_REFERENCE);
-    obj4.updateLighting(lights, 10);
-    const char* paths4[] =
-    {
-    "TextureImages/awesomeface.pngs",
-    "TextureImages/container.jpg",
-    "TextureImages/wall.jpg"
-
-    };
-    obj4.setTextures(texture, sizeof(texture), paths4, 3);
+    GameObject ground = GameObject(glm::vec3(0, -1.5, 0), glm::vec3(0, 0, 0), vertices, numVertices, &DefaultShader, true);
+    ground.setScale(glm::vec3(500, 1, 500));
 
 
-    glEnable(GL_DEPTH_TEST);
+    GameObject* arr[3] = {&obj, &teapot, &ground};
+    #pragma endregion
 
+    Scene mainScene(arr, 3, lights, 10, &cameraInst, PROJECTION);
 
-    bool isOnDefaultCam = true;
-
-    int FpsSampleCounter = 0;
-    double DeltatimeMean = 0;
-
-
-    // light teste2;
-    std::vector<GameObject*> allObjects;
-    allObjects.reserve(15);
-    allObjects.push_back(&obj);
-    allObjects.push_back(&obj2);
-    allObjects.push_back(&obj3);
-    allObjects.push_back(&obj4);
-    allObjects.push_back(&teapot);
-
-    
-    //adicionando objetos para representarem as luzes
-    for (int i = 0; i < 10; ++i)
-    {
-        Light& light = lights[i];
-
-        glm::vec4 objectColor = glm::vec4(light.getColor()*glm::fvec1(light.getIntensity()*2), 1.0f);
-
-        // Criando o GameObject na mesma posição da luz
-        GameObject* object1 = new GameObject(light.getPos(), glm::vec3(0, 0, 0), objectColor, vertices, numVertices, DEFAULT_SHADER_REFERENCE, true);
-        object1->setScale(object1->getScale() * glm::fvec1(light.getIntensity()*0.25));
-        object1->updateLighting(lights, 10);
-        allObjects.push_back(object1);
-    }
-
-    // Mean for every 2 frames with weights 0.8 and 0.2, with the newer frame being weighted higher.
     while (!glfwWindowShouldClose(Window))
     {
         processInput(Window);
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        // glClear(GL_COLOR_BUFFER_BIT);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         double timeValue = glfwGetTime();
         DeltaTime = timeValue - LastTime;
         LastTime = timeValue;
 
-
-
-        DeltatimeMean = (DeltatimeMean * 0.2 + DeltaTime * 0.8) / 2;
-        FpsSampleCounter++;
-        if (FpsSampleCounter >= AMOUNT_OF_SAMPLES_TO_COUNT_FPS)
-        {
-            FpsSampleCounter = 0;
-            std::cout << "Fps: " << int(1 / DeltaTime) << "\n";
-        }
+        fpsLog();
 
         keyInput();
         cameraMovement();
-        if (isKeyPressed(Window, GLFW_KEY_C) && isKeyPressed(Window, GLFW_KEY_LEFT_SHIFT))
-        {
-            isOnDefaultCam = true;
-        }
-        else if (isKeyPressed(Window, GLFW_KEY_C))
-        {
-            isOnDefaultCam = false;
-        }
 
- /*       if (isKeyPressed(Window, GLFW_KEY_1))
-        {
-            teste.position.y += DeltaTime * Speed / 2;
-        }
-        else if (isKeyPressed(Window, GLFW_KEY_0))
-        {
-            teste.position.y += DeltaTime * -Speed / 2;
-        }
-        */
-        if (isOnDefaultCam)
-        {
-            View = cameraInst.getViewMatrix();
-        }
-        else
-        {
-            View = cameraInst2.getViewMatrix();
-        }
 
-        for (GameObject* objeto : allObjects)
-        {
-            objeto->objUpdate();
-            
-            objeto->prepareRender(View, PROJECTION);
-
-            glDrawArrays(GL_TRIANGLES, 0, objeto->verticesNum / 3);
-            glBindVertexArray(0);
-        }
+        mainScene.render();
 
 
 
@@ -489,16 +386,22 @@ int main()
         glfwPollEvents();
 
     }
-    for (int i =5;i<15;i++)
-    {
-        delete(allObjects[i]);
-    }
+    
 
     glfwTerminate();
     return 0;
 }
 
-
+void fpsLog()
+{
+    DeltatimeMean = (DeltatimeMean * 0.2 + DeltaTime * 0.8) / 2;
+    FpsSampleCounter++;
+    if (FpsSampleCounter >= AMOUNT_OF_SAMPLES_TO_COUNT_FPS)
+    {
+        FpsSampleCounter = 0;
+        std::cout << "Fps: " << int(1 / DeltaTime) << "\n";
+    }
+}
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);

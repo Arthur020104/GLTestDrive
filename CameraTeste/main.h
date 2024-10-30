@@ -13,3 +13,4 @@ extern Shader* DEFAULT_SHADER_REFERENCE;
 // Function prototypes
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void printVec3(const glm::vec3& vec);
+void fpsLog();
