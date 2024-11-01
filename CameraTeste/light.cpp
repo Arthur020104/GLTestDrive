@@ -25,6 +25,50 @@ float Light::getIntensity()
 {
 	return intensity;
 }
+void Light::setPos(const glm::vec3& newPos)
+{
+	TransformController::setPos(newPos);
+	if (lightsThatWereUpdated != nullptr)
+	{
+		lightsThatWereUpdated->insert(this);
+	}
+}
+void Light::setRot(const glm::vec3& newRot)
+{
+	TransformController::setRot(newRot);
+	if (lightsThatWereUpdated != nullptr)
+	{
+		lightsThatWereUpdated->insert(this);
+	}
+}
+/*void Light::setScale(const glm::vec3& newScale)
+{
+	TransformController::setScale(newScale);
+	if (lightsThatWereUpdated != nullptr)
+	{
+		lightsThatWereUpdated->insert(this);
+	}
+}*/
+void Light::prepareRender()
+{
+	GameObject::mustHaveRenderAtribb("prepareRender");
+
+	Shader* shaderProgramL = this->getShaderPointer();
+	shaderProgramL->use();
+
+	this->getShaderPointer()->setVec3("LightColor", color);
+
+	shaderProgramL->setMat4("model", this->getModelMatrix());
+
+	std::vector<unsigned int>* texturesIds = this->getTextureIds();
+
+	for (int i = 0; i < texturesIds->size(); i++)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, texturesIds->at(i));
+	}
+	glBindVertexArray(this->getVAO());
+}
 /*
 Light::~Light()
 {
