@@ -13,28 +13,31 @@
 #include "light.h"
 #include "teapot.h"
 #include "scene.h"
+#include "material.h"
 
 // Outras bibliotecas
 #include <iostream>
 /** TODO:
 1. GameObject
-    1. This class should be able to serve as the parent class for lights and cameras.
-        1. It must work without necessarily needing a physical representation in the world.
     2. Create function pointers for `beforeUpdate` and `afterUpdate`.
     3. Implement EBO optimization.
     4. Load data from files:
         4.0 Constructor should accept a file path instead of vertices and vertex count.
         4.1 Method to load vertices from files.
         4.2 Method to load normals from files.
+        4.3 The must have EBO at somepoint
     5. Add texture options, including repeat, mipmap settings, and others.
     6. Determine if some elements can be moved to smaller, more specialized classes. https://www.youtube.com/watch?v=IMZMLvIwa-k
 
 2. Material
-    - Holds the visual properties of the object, such as shininess, specular light intensity, and color.
+    Done for now;
+3. Create a default config file move the size of the window there default elements and everthing this is done to be easy to be set , maybe create
 **/
 
 
 // Constantes de tempo e janela
+Material DEFAULT_MATERIAL = Material();
+
 const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 720;
 const double NEAR_FRUSTUM = 0.1f;
@@ -59,9 +62,6 @@ float HorizontalSens = 100.0f;
 GLFWwindow* Window;
 Shader* DEFAULT_SHADER_REFERENCE;
 
-// Buffers e texturas
-unsigned int VBO, VAO, EBO, VBO1, VAO1, EBO1;
-unsigned int Texture1, Texture2;
 
 // Câmeras
 Camera cameraInst = Camera(glm::vec3(5, 2, -3), true);
@@ -351,9 +351,9 @@ int main()
     Light l2 = Light(glm::vec3(25.0f, 5.0f, -130.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.011f, 1.0f, 0.011f), false, 50.0f);
     Light l3 = Light(glm::vec3(-10.0f, 10.0f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.8f, 0.8f, 1.0f), false, 1.0f);
     Light l4 = Light(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 1.0f);
-    Light l5 = Light(glm::vec3(-130.0f, 5.0f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.11f, 0.8f), false, 1600.0f);
+    Light l5 = Light(glm::vec3(-130.0f, 200.0f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.11f, 0.8f), false, 1600.0f);
     Light l6 = Light(glm::vec3(-10.0f, 10.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.3f), false, 1.9f);
-    Light l7 = Light(glm::vec3(0.0f, 820.0f, -50.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 15000.0f);
+    Light l7 = Light(glm::vec3(0.0f, 820.0f, 350.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 15000.0f);
     Light l8 = Light(glm::vec3(-10.0f, 10.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 1.0f);
     Light l9 = Light(glm::vec3(25.0f, 5.0f, -105.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.011f, 0.011f, 1.0f), false, 30.3f);
     Light l10 = Light(glm::vec3(25.0f, 5.0f, -70.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.011f, 0.011f), false, 30.3f);
@@ -361,6 +361,9 @@ int main()
     #pragma endregion
 
     #pragma region GameObjects
+    //Material(const glm::vec4& colorV, const float& roughnessAmt, const float& amtOfSpecular)
+    Material veryShine(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f), 3, 30);
+
     GameObject obj = GameObject(glm::vec3(0.0f, 0.0f, -40.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
 
     const char* pathss[] = { "TextureImages/wall.jpg" };
@@ -375,6 +378,7 @@ int main()
 
     GameObject wall = GameObject(glm::vec3(0.0f, 248.5f, -250.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
     wall.setScale(glm::vec3(500.0f, 500.0f, 1.0f));
+    wall.setMaterial(&veryShine);
 
     GameObject* arr[14] = { &obj, &teapot, &ground, &wall };
 
@@ -383,11 +387,11 @@ int main()
     {
         //lights[i]->getPos() 
         lights[i]->enablePhysicalRepresentation(vertices, numVertices, &LightShader);
-       //
+        lights[i]->setScale(lights[i]->getScale()* glm::fvec1(lights[i]->getIntensity()/20));
         if (i == 0)
         {
+           
             const char* paths[] = { "TextureImages/glowstone.jpg" };
-         //   lights[i]->setScale(lights[i]->getScale()* glm::fvec1(10));
             lights[i]->setTextures(texture, sizeof(texture), paths, 1);
         }
        
@@ -403,7 +407,7 @@ int main()
     {
         processInput(Window);
 
-        glClearColor(0.6f, 0.6f, 1.0f, 0.0f);
+        glClearColor(0.5f, 0.5f, 1.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         float timeValue = glfwGetTime();
@@ -414,7 +418,7 @@ int main()
 
         keyInput();
         cameraMovement();
-        if (l1.getPos().z < -250 || l1.getPos().z > 50 )
+        if (l1.getPos().z < -150 || l1.getPos().z > 50 )
         {
             lightSpeed *= -1;
         }
