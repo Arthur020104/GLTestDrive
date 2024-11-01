@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>  
 #include "shader.h"
 
-extern double DeltaTime;
+extern float DeltaTime;
 extern const unsigned int WIDTH;
 extern const unsigned int HEIGHT;
 extern const double NEAR_FRUSTUM;
