@@ -28,6 +28,7 @@ float Light::getIntensity()
 void Light::setPos(const glm::vec3& newPos)
 {
 	TransformController::setPos(newPos);
+	lightTransform.setPos(newPos);
 	if (lightsThatWereUpdated != nullptr)
 	{
 		lightsThatWereUpdated->insert(this);
@@ -36,6 +37,7 @@ void Light::setPos(const glm::vec3& newPos)
 void Light::setRot(const glm::vec3& newRot)
 {
 	TransformController::setRot(newRot);
+	lightTransform.setRot(newRot);
 	if (lightsThatWereUpdated != nullptr)
 	{
 		lightsThatWereUpdated->insert(this);
@@ -74,3 +76,7 @@ Light::~Light()
 {
 	return;
 }*/
+glm::mat4 Light::getLightModelMat()
+{
+	return lightTransform.getModelMatrix();
+}
