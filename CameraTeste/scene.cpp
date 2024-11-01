@@ -18,6 +18,9 @@
 #include <algorithm>
 #include <iostream>
 
+//TODO remover  Light** lightArr, const int& sizeLightArr
+//Separar luz objs no constructor
+
 
 Scene::Scene(GameObject** objArr, const int& sizeObjArr, Light** lightArr, const int& sizeLightArr, Camera* camera, const glm::mat4& projection)
 {
@@ -58,7 +61,7 @@ void Scene::updateLightsCache()
 
     for (int i = 0; i < sizeOfLightsArr; i++) 
     {
-        lightsPosWorldCache[i] = sceneLights[i]->getPos() * glm::mat3(sceneLights[i]->getModelMatrix());
+        lightsPosWorldCache[i] = sceneLights[i]->getPos() * glm::mat3(sceneLights[i]->getLightModelMat());
         lightsColorsCache[i] = sceneLights[i]->getColor();
         lightsIntensityCache[i] = sceneLights[i]->getIntensity();
     }
