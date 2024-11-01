@@ -36,6 +36,7 @@ Scene::Scene(GameObject** objArr, const int& sizeObjArr, Light** lightArr, const
     for (int i = 0; i < sizeLightArr; i++)
     {
         sceneLights[i] = lightArr[i];
+        sceneLights[i]->lightsThatWereUpdated = &lightsChanged;
     }
     sizeOfLightsArr = sizeLightArr;
  
@@ -51,26 +52,29 @@ Scene::Scene(GameObject** objArr, const int& sizeObjArr, Light** lightArr, const
 
 void Scene::updateLightsCache()
 {
-    lightsPosCache.resize(sizeOfLightsArr);
+    lightsPosWorldCache.resize(sizeOfLightsArr);
     lightsColorsCache.resize(sizeOfLightsArr);
     lightsIntensityCache.resize(sizeOfLightsArr);
-    lightsModelMatrixCache.resize(sizeOfLightsArr);
 
     for (int i = 0; i < sizeOfLightsArr; i++) 
     {
-        lightsPosCache[i] = sceneLights[i]->getPos();
+        lightsPosWorldCache[i] = sceneLights[i]->getPos() * glm::mat3(sceneLights[i]->getModelMatrix());
         lightsColorsCache[i] = sceneLights[i]->getColor();
         lightsIntensityCache[i] = sceneLights[i]->getIntensity();
-        lightsModelMatrixCache[i] = sceneLights[i]->getModelMatrix();
     }
   
 }
 
 void Scene::render()
 {
+    if (lightsChanged.size() > 0)//isso precisa ser otimizado atualizar apenas cache de luz que alterou 
+    {
+        updateLightsCache();
+        lightsChanged.clear();
+    }
     for (int i = 0; i < sceneObjs.size(); i++) 
     {
-        sceneObjs[i]->objUpdate();
+        sceneObjs[i]->Update();
         sceneObjs[i]->prepareRender();
 
         glm::mat4 viewMatrix = mainCamera->getViewMatrix();
@@ -83,8 +87,7 @@ void Scene::render()
                 shaderProgram->setInt("numberOfLights", sizeOfLightsArr);
                 shaderProgram->setFloatArray("lightIntensity", &lightsIntensityCache[0], lightsIntensityCache.size());
                 shaderProgram->setArrayVec3("lightsColorValues", &lightsColorsCache[0], lightsColorsCache.size());
-                shaderProgram->setArrayMat3("lightModelMat", &lightsModelMatrixCache[0], lightsModelMatrixCache.size());
-                shaderProgram->setArrayVec3("lightsPos", &lightsPosCache[0], lightsPosCache.size());
+                shaderProgram->setArrayVec3("lightsPosWorld", &lightsPosWorldCache[0], lightsPosWorldCache.size());
                 shaderProgram->setMat4("projection", projectionMat);
                 shaderProgram->setMat4("view", viewMatrix);
                 shaderProgram->setMat3("view3", glm::mat3(viewMatrix));
@@ -92,6 +95,36 @@ void Scene::render()
         }
 
         glDrawArrays(GL_TRIANGLES, 0, sceneObjs[i]->getVerticesNum() / 3);
+        glBindVertexArray(0);
+        sceneObjs[i]->disableTextures();
     }
-    glBindVertexArray(0); 
+    
+}
+void Scene::groupObjVectorByShader()
+{
+    std::set<Shader*> uniqueShaders;
+    for (const auto& obj : sceneObjs) 
+    {
+        Shader* shader = obj->getShaderPointer();
+        if (!shader) 
+        {
+            std::cout << "Shader is NULL\n";
+        }
+        uniqueShaders.insert(shader);
+    }
+
+    std::vector<GameObject*> newSceneObjects;
+    newSceneObjects.reserve(sceneObjs.size());
+
+    for (Shader* shader : uniqueShaders) 
+    {
+        for (const auto& obj : sceneObjs) 
+        {
+            if (obj->getShaderPointer() == shader) 
+            {
+                newSceneObjects.push_back(obj);
+            }
+        }
+    }
+    sceneObjs = std::move(newSceneObjects);
 }

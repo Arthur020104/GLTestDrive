@@ -4,6 +4,8 @@
 #include <glad/glad.h>
 #include <glm/glm/glm.hpp>
 #include <glm/glm/gtc/matrix_transform.hpp>
+#include <set>
+#include <vector>
 
 // Bibliotecas do projeto
 #include "light.h"
@@ -20,7 +22,6 @@ public:
     Scene(GameObject** objArr, const int& sizeObjArr, Light** lightArr, const int& sizeLightArr, Camera* camera, const glm::mat4& projection);
 
     // Métodos de gerenciamento de cena
-    void updateLightsCache();
     void render();
 
 private:
@@ -38,8 +39,12 @@ private:
     glm::mat4 projectionMat;
 
     // Caches para propriedades das luzes
-    std::vector<glm::vec3> lightsPosCache;
+    std::vector<glm::vec3> lightsPosWorldCache;
     std::vector<glm::vec3> lightsColorsCache;
     std::vector<float> lightsIntensityCache;
-    std::vector<glm::mat3> lightsModelMatrixCache;
+
+    std::set<Light*> lightsChanged;
+
+    void updateLightsCache();
+    void groupObjVectorByShader();
 };
