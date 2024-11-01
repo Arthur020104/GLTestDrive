@@ -37,8 +37,8 @@ void main()
 
     float ambientLightC = 0.3;
 
-    float specularShininess = 256.0;
-    float specularIntensity = 1.0;
+    float specularShininess = 100;
+    float specularIntensity = 0.5;
 
 
     vec3 eyePosition = v;
