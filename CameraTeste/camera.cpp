@@ -89,3 +89,15 @@ void Camera::verticalRotation(const double& degrees)
 	forwardVec = glm::normalize(targetPos - cameraPos);
 	rightVec = glm::normalize(glm::cross(foward(), glm::vec3(0, 1, 0)));
 }
+void Camera::setTarget(const glm::vec3& target)
+{
+	if (fpsCam)
+	{
+		glm::vec3 dir = glm::normalize( target- cameraPos);
+
+		targetPos = dir * glm::fvec1(FAR_FRUSTUM);
+		return;
+	}
+
+	targetPos = target;
+}
