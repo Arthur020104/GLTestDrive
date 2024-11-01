@@ -186,8 +186,11 @@ void GameObject::prepareRender()
 
     this->shaderProgram->setMat3("model3", glm::mat3(model));
 
-    shaderProgram->setVec4("color", glm::vec4(0.6f, 0.6f, 0.6f,1.0f));
+    shaderProgram->setVec4("color",material->color);
 
+    shaderProgram->setFloat("roughness", material->roughness);
+
+    shaderProgram->setFloat("amountOfSpecular", material->amountOfSpecular);
 
     for (int i = 0; i < texturesIds.size(); i++)
     {
@@ -328,4 +331,8 @@ unsigned int GameObject::getVBO()
 std::vector<unsigned int>* GameObject::getTextureIds()
 {
     return &texturesIds;
+}
+void GameObject::setMaterial(Material* newMaterial)
+{
+    material = newMaterial;
 }

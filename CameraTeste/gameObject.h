@@ -10,9 +10,10 @@
 // Bibliotecas do projeto
 #include "transformController.h"
 #include "shader.h"
+#include "material.h"
+#include "main.h"
 
 // Constantes padrão
-const glm::vec4 DEFAULT_COLOR = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
 const bool DEFAULT_STATIC = true;
 const glm::vec3 DEFAULT_POSITION = glm::vec3(0.0f, 0.0f, 0.0f);
 const glm::vec3 DEFAULT_ROTATION = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -58,6 +59,7 @@ public:
     void Update();
     void AftherUpdate();
 
+    void setMaterial(Material* newMaterial);
     void setUpdateFunc(std::function<void(GameObject*)> func);
     virtual void prepareRender();
     void setTextures(const float* textureCoords, const int& sizeOftextureCoords, const char** paths, const int& numberOfTextures);
@@ -75,6 +77,8 @@ private:
     bool isStaticObj;
     std::vector<unsigned int> texturesIds;
     std::function<void(GameObject*)> updateFunc;
+   
+    Material* material = &DEFAULT_MATERIAL;
 
     unsigned int VAO;
     unsigned int VBO;

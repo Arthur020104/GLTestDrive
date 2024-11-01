@@ -12,11 +12,13 @@ uniform int numberOfLights;
 uniform mat3 model3;
 uniform mat3 view3;
 
+uniform float roughness = 100;
+uniform float amountOfSpecular = 1;
+
 in vec4 myVertex;
 
 vec3 v = normalize(-vec3(view3[0][2], view3[1][2], view3[2][2]));
 
-uniform vec3 wVec; // Unused, consider removing if not needed
 uniform vec4 color;
 
 out vec4 FragColor;
@@ -37,9 +39,6 @@ void main()
 
     float ambientLightC = 0.3;
 
-    float specularShininess = 100;
-    float specularIntensity = 0.5;
-
 
     vec3 eyePosition = v;
     vec3 fragmentPosition = myVertex.xyz ;
@@ -59,7 +58,7 @@ void main()
         vec3 reflectedLight = normalize(reflect(-lightDirection, transformedNormal));
 
         totalSpecularAndDiffuse += attenuation * lightsColorValues[i]* lightIntensity[i] * (diffuseFactor  +   
-        specularIntensity * pow(max(dot(viewDirection, reflectedLight), 0.0), specularShininess));
+        amountOfSpecular * pow(max(dot(viewDirection, reflectedLight), 0.0), roughness));
 
         if(minDistance > distanceToLight)
         {
