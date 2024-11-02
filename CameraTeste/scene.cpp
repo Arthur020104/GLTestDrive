@@ -75,32 +75,41 @@ void Scene::render()
         updateLightsCache();
         lightsChanged.clear();
     }
-    for (int i = 0; i < sceneObjs.size(); i++) 
+    for (int i = 0; i < sceneObjs.size(); i++)
     {
         sceneObjs[i]->Update();
+        sceneObjs[i]->AftherUpdate();
+    }
+    for (int i = 0; i < sceneObjs.size(); i++) 
+    {
+        if (!sceneObjs[i]->hasRenderAtribs())
+        {
+            continue; //Se objeto nao tiver atributos para renderizacao pular
+        }
+        
+
         sceneObjs[i]->prepareRender();
 
         glm::mat4 viewMatrix = mainCamera->getViewMatrix();
         if (i == 0 || sceneObjs[i - 1]->getShaderPointer() != sceneObjs[i]->getShaderPointer()) 
         {
             Shader* shaderProgram = sceneObjs[i]->getShaderPointer();
-            if (shaderProgram) 
-            {
-                shaderProgram->use();
-                shaderProgram->setInt("numberOfLights", sizeOfLightsArr);
-                shaderProgram->setFloatArray("lightIntensity", &lightsIntensityCache[0], lightsIntensityCache.size());
-                shaderProgram->setArrayVec3("lightsColorValues", &lightsColorsCache[0], lightsColorsCache.size());
-                shaderProgram->setArrayVec3("lightsPosWorld", &lightsPosWorldCache[0], lightsPosWorldCache.size());
-                shaderProgram->setMat4("projection", projectionMat);
-                shaderProgram->setMat4("view", viewMatrix);
-                shaderProgram->setMat3("view3", glm::mat3(viewMatrix));
-            }
+            shaderProgram->use();
+            shaderProgram->setInt("numberOfLights", sizeOfLightsArr);
+            shaderProgram->setFloatArray("lightIntensity", &lightsIntensityCache[0], lightsIntensityCache.size());
+            shaderProgram->setArrayVec3("lightsColorValues", &lightsColorsCache[0], lightsColorsCache.size());
+            shaderProgram->setArrayVec3("lightsPosWorld", &lightsPosWorldCache[0], lightsPosWorldCache.size());
+            shaderProgram->setMat4("projection", projectionMat);
+            shaderProgram->setMat4("view", viewMatrix);
+            shaderProgram->setMat3("view3", glm::mat3(viewMatrix));
+            
         }
 
         glDrawArrays(GL_TRIANGLES, 0, sceneObjs[i]->getVerticesNum() / 3);
         glBindVertexArray(0);
         sceneObjs[i]->disableTextures();
     }
+
     
 }
 void Scene::groupObjVectorByShader()
