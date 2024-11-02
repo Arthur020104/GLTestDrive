@@ -43,7 +43,7 @@ const unsigned int HEIGHT = 720;
 const double NEAR_FRUSTUM = 0.1f;
 const double FAR_FRUSTUM = 1000000000;
 const int AMOUNT_OF_SAMPLES_TO_COUNT_FPS = 2000;
-const glm::mat4 PROJECTION = glm::perspective(glm::radians(50.0f), (float)WIDTH / HEIGHT, (float)NEAR_FRUSTUM, (float)FAR_FRUSTUM);
+const glm::mat4 PROJECTION = glm::perspective(glm::radians(55.0f), (float)WIDTH / HEIGHT, (float)NEAR_FRUSTUM, (float)FAR_FRUSTUM);
 
 // Variáveis de tempo
 float DeltaTime = 0.0f;
@@ -54,7 +54,7 @@ double LastXPos = -100000, LastYPos = -100000;
 
 // Variáveis de sensibilidade de movimento
 float Speed = 8.0f;
-float DefaultSpeed = 8.0f;
+float DefaultSpeed = 18.0f;
 float VerticalSens = 100.0f;
 float HorizontalSens = 100.0f;
 
@@ -68,7 +68,41 @@ Camera cameraInst = Camera(glm::vec3(5, 2, -3), true);
 
 // Matrizes de visualização
 glm::mat4 View;
+int whereToChangeColor = 0;
+bool adding = true;
+void dinamicLightUpdate(GameObject* obj)
+{
 
+    float rate = 1.0f;  
+    
+    Light* l = (Light*)obj;
+    glm::vec3 addToColor = l->getColor();
+
+    addToColor[whereToChangeColor] += rate * DeltaTime * (adding ? 1 : -1);
+
+  
+    if (addToColor[whereToChangeColor] >= 1.0f)
+    {
+        addToColor[whereToChangeColor] = 1.0f;
+        adding = false;
+    }
+    else if (addToColor[whereToChangeColor] <= 0.1f)
+    {
+        addToColor[whereToChangeColor] = 0.1f;
+        adding = true;
+    }
+    if (addToColor[whereToChangeColor] == 1.0f || addToColor[whereToChangeColor] == 0.1f)
+    {
+        whereToChangeColor++;
+        if (whereToChangeColor >= 3)
+        {
+            whereToChangeColor = 0;
+        }
+    }
+
+    l->setColor(addToColor);
+
+}
 
 int FpsSampleCounter = 0;
 float DeltatimeMean = 0.0f;
@@ -166,7 +200,7 @@ void keyInput()
     }
     if (Speed <= DefaultSpeed && isKeyPressed(Window, GLFW_KEY_LEFT_SHIFT))
     {
-        Speed  = DefaultSpeed * 3.0f;
+        Speed  = DefaultSpeed * 8.0f;
     }
     else if (Speed <= DefaultSpeed && isKeyPressed(Window, GLFW_KEY_LEFT_CONTROL))
     {
@@ -195,6 +229,16 @@ void cameraMovement()
     cameraInst.horizontalRotation(HorizontalSens* DeltaTime* (LastXPos - xpos));
     cameraInst.verticalRotation(HorizontalSens * DeltaTime * (LastYPos - ypos));
     LastXPos = xpos; LastYPos = ypos;
+}
+
+void objAftherUpdate(GameObject* obj) 
+{
+    if (isKeyPressed(Window, GLFW_KEY_LEFT_CONTROL) && isKeyPressed(Window, GLFW_KEY_LEFT_SHIFT) && isKeyPressed(Window, GLFW_KEY_T))
+    {
+        cameraInst.setPos(obj->getPos() - glm::vec3(0, -1, -8.5));
+        cameraInst.setTarget(obj->getPos());
+
+    }
 }
 
 int init(GLFWwindow** window)
@@ -347,61 +391,82 @@ int main()
 
 
     #pragma region Lights
-    Light l1 = Light(glm::vec3(25.0f, 100.0f, -25.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.65f, 0.011f), false, 1000.0f);
-    Light l2 = Light(glm::vec3(25.0f, 5.0f, -130.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.011f, 1.0f, 0.011f), false, 50.0f);
-    Light l3 = Light(glm::vec3(-10.0f, 10.0f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.8f, 0.8f, 1.0f), false, 1.0f);
-    Light l4 = Light(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 1.0f);
-    Light l5 = Light(glm::vec3(-130.0f, 200.0f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.11f, 0.8f), false, 1600.0f);
-    Light l6 = Light(glm::vec3(-10.0f, 10.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.3f), false, 1.9f);
-    Light l7 = Light(glm::vec3(0.0f, 820.0f, 350.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 15000.0f);
-    Light l8 = Light(glm::vec3(-10.0f, 10.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 1.0f);
-    Light l9 = Light(glm::vec3(25.0f, 5.0f, -105.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.011f, 0.011f, 1.0f), false, 30.3f);
-    Light l10 = Light(glm::vec3(25.0f, 5.0f, -70.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.011f, 0.011f), false, 30.3f);
+    Light l1 = Light(glm::vec3(25.0f, 100.0f, -25.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.65f, 0.011f), false, 200.0f);
+    Light l2 = Light(glm::vec3(25.0f, 5.0f, -130.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.011f, 1.0f, 0.011f), false, 25.0f);
+    Light l3 = Light(glm::vec3(-10.0f, 10.0f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.8f, 0.8f, 1.0f), false, 10.0f);
+    Light l4 = Light(glm::vec3(-240.0f, 10.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 10.0f);
+    Light l5 = Light(glm::vec3(-330.0f, 30.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 1000.0f);
+    Light l6 = Light(glm::vec3(0.0f, 8.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.3f), false, 10.9f);
+    Light l7 = Light(glm::vec3(0.0f, 820.0f, 350.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 1000.0f);
+    Light l8 = Light(glm::vec3(180.0f, 50.0f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 150.0f);
+    Light l9 = Light(glm::vec3(25.0f, 5.0f, -105.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.011f, 0.011f, 1.0f), false, 15.3f);
+    Light l10 = Light(glm::vec3(25.0f, 5.0f, -70.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.011f, 0.011f), false, 15.3f);
     Light* lights[10] = { &l1, &l2, &l3, &l4, &l5,&l6,&l7,&l8,&l9,&l10 };
+    l8.setUpdateFunc(&dinamicLightUpdate);
     #pragma endregion
 
     #pragma region GameObjects
     //Material(const glm::vec4& colorV, const float& roughnessAmt, const float& amtOfSpecular)
-    Material veryShine(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f), 3, 30);
+    Material veryShine(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f), 20, 25);
+
+    Material veryShineBlue(glm::vec4(0.0999f, 0.09991f, 0.35f, 1.0f), 20, 250);
+
+    Material veryRoughGray(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 750, 0.5);
+
+    Material veryRoughBlue(glm::vec4(0.0999f, 0.09991f, 0.4f, 1.0f), 750, 0.5);
 
     GameObject obj = GameObject(glm::vec3(0.0f, 0.0f, -40.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
 
-    const char* pathss[] = { "TextureImages/wall.jpg" };
+    const char* pathss[] = { "TextureImages/scene.jpg" };
     obj.setTextures(texture, sizeof(texture), pathss, 1);
     obj.setScale(obj.getScale()* glm::fvec1(2));
 
     GameObject teapot = GameObject(glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 180.0f), teapotVertices, teapot_count, DEFAULT_SHADER_REFERENCE, false);
     teapot.setUpdateFunc(&objUpdate);
+    teapot.setAftherUpdateFunc(&objAftherUpdate);
+    teapot.setMaterial(&veryRoughBlue);
 
     GameObject ground = GameObject(glm::vec3(0.0f, -1.5f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
     ground.setScale(glm::vec3(500.0f, 1.0f, 500.0f));
+    ground.setMaterial(&veryRoughGray);
 
     GameObject wall = GameObject(glm::vec3(0.0f, 248.5f, -250.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
     wall.setScale(glm::vec3(500.0f, 500.0f, 1.0f));
     wall.setMaterial(&veryShine);
 
-    GameObject* arr[14] = { &obj, &teapot, &ground, &wall };
+    GameObject bigBlock = GameObject(glm::vec3(100.0f, 100.5f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
+    bigBlock.setScale(glm::vec3(50.0f, 50.0f, 50.0f));
+    bigBlock.setMaterial(&veryShine);
+    bigBlock.setTextures(texture, sizeof(texture), pathss, 1);
+
+    GameObject bigBlock2 = GameObject(glm::vec3(-100.0f, 100.5f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
+    bigBlock2.setScale(glm::vec3(50.0f, 50.0f, 50.0f));
+    bigBlock2.setMaterial(&veryShineBlue);
+
+    GameObject* arr[16] = { &obj, &teapot, &ground, &wall, &bigBlock, &bigBlock2};
 
     // Adicionando representação das luzes
     for (int i = 0; i < 10; i++) 
     {
         //lights[i]->getPos() 
         lights[i]->enablePhysicalRepresentation(vertices, numVertices, &LightShader);
-        lights[i]->setScale(lights[i]->getScale()* glm::fvec1(lights[i]->getIntensity()/20));
+        lights[i]->setScale(lights[i]->getScale()* glm::fvec1(lights[i]->getIntensity()/10));
         if (i == 0)
         {
            
             const char* paths[] = { "TextureImages/glowstone.jpg" };
             lights[i]->setTextures(texture, sizeof(texture), paths, 1);
+            
         }
        
         //lights[i]->setTextures()
-        arr[i + 4] = lights[i];
+        arr[i + 6] = lights[i];
     }
 
     #pragma endregion
-    float lightSpeed = -100.0f;
-    Scene mainScene(arr, 14, lights, 10, &cameraInst, PROJECTION);
+    float lightSpeed = -55.0f;
+    Scene mainScene(arr, 16, lights, 10, &cameraInst, PROJECTION);
+
 
     while (!glfwWindowShouldClose(Window))
     {
@@ -413,24 +478,32 @@ int main()
         float timeValue = glfwGetTime();
         DeltaTime = timeValue - LastTime;
         LastTime = timeValue;
+            
+        
+
+
 
         fpsLog();
 
+
         keyInput();
         cameraMovement();
-        if (l1.getPos().z < -150 || l1.getPos().z > 50 )
+        // Check position and adjust speed direction
+        if (l1.getPos().z <= -150.0f && lightSpeed < 0)
         {
-            lightSpeed *= -1;
+            lightSpeed *= -1; // Reverse direction when hitting the lower bound
         }
-        l1.setPos(l1.getPos() + glm::vec3(0 , 0, DeltaTime * lightSpeed));
+        else if (l1.getPos().z >= -30.0f && lightSpeed > 0)
+        {
+            lightSpeed *= -1; // Reverse direction when hitting the upper bound
+        }
+
+        // Update the position with the adjusted speed
+        l1.setPos(l1.getPos() + glm::vec3(0.0f, 0.0f, DeltaTime * lightSpeed));
+
 
         mainScene.render();
-        if (isKeyPressed(Window, GLFW_KEY_LEFT_CONTROL) && isKeyPressed(Window, GLFW_KEY_LEFT_SHIFT) && isKeyPressed(Window, GLFW_KEY_T))
-        {
-            cameraInst.setPos(teapot.getPos() - glm::vec3(0, -5, -2.5));
-            cameraInst.setTarget(teapot.getPos());
-
-        }
+       
 
 
         glfwSwapBuffers(Window);
