@@ -220,6 +220,17 @@ void GameObject::Update()
     }
     
 }
+void GameObject::setAftherUpdateFunc(std::function<void(GameObject*)> func)
+{
+    aftherUpdateFunc = func;
+}
+void GameObject::AftherUpdate()
+{
+    if (aftherUpdateFunc != nullptr)
+    {
+        aftherUpdateFunc(this);
+    }
+}
 bool containsNaN(const glm::vec3& vec) 
 {
     return std::isnan(vec.x) || std::isnan(vec.y) || std::isnan(vec.z);
@@ -296,17 +307,19 @@ bool GameObject::hasVertices()
 
     return true;
 }
-
+bool GameObject::hasRenderAtribs()
+{
+    if (!hasVertices() || shaderProgram == nullptr)
+    {
+        return false;
+    }
+    return true;
+}
 void GameObject::mustHaveRenderAtribb(std::string methodName)
 {
-    if (!hasVertices())
+    if (!hasRenderAtribs())
     {
-        throw std::runtime_error("[ERROR] GameObject must have vertices when executing the method: " + methodName);
-    }
-
-    if (shaderProgram == nullptr)
-    {
-        throw std::runtime_error("[ERROR] GameObject must have shaderProgram when executing the method: " + methodName);
+        throw std::runtime_error("[ERROR] GameObject must have render atributes. Error on method: " + methodName);
     }
 }
 

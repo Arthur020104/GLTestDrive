@@ -61,6 +61,7 @@ public:
 
     void setMaterial(Material* newMaterial);
     void setUpdateFunc(std::function<void(GameObject*)> func);
+    void setAftherUpdateFunc(std::function<void(GameObject*)> func);
     virtual void prepareRender();
     void setTextures(const float* textureCoords, const int& sizeOftextureCoords, const char** paths, const int& numberOfTextures);
     void updateNormals();
@@ -68,7 +69,7 @@ public:
     Shader* getShaderPointer() const;
     void enablePhysicalRepresentation(const float* vertices, const int& numVertices, Shader* shaderProgramRef);
     void disableTextures();
-
+    bool hasRenderAtribs();
 private:
     // Variáveis privadas
     std::vector<float> vertexNormals;
@@ -76,7 +77,9 @@ private:
     float* verticesObj = nullptr;
     bool isStaticObj;
     std::vector<unsigned int> texturesIds;
+
     std::function<void(GameObject*)> updateFunc;
+    std::function<void(GameObject*)> aftherUpdateFunc;
    
     Material* material = &DEFAULT_MATERIAL;
 
