@@ -69,6 +69,6 @@ void main()
 
     vec3 totalAmbientLight = vec3(ambientLightC) * lightsColorValues[indexClosest];
 
-    vec4 baseColor = (color.a > 0.0) ? mix(blendedTextureColor, color, 0.1) : color;
+    vec4 baseColor = (blendedTextureColor.x > 0.0) ? mix(blendedTextureColor, vec4(0.1,0.1,0.1,1), 0.1) : color;
     FragColor = baseColor * (vec4(totalSpecularAndDiffuse, 1.0) + vec4(totalAmbientLight,1));
 }

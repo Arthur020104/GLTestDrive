@@ -23,6 +23,6 @@ void main()
     
     vec3 totalDiffuse = vec3(0.0);
 
-    vec4 baseColor = (blendedTextureColor.x > 0.0) ? mix(blendedTextureColor, vec4(LightColor, 1), 0.01) : vec4(LightColor, 1);
+    vec4 baseColor = (blendedTextureColor.x > 0.0) ? blendedTextureColor : vec4(LightColor, 1);
     FragColor = baseColor;
 }
