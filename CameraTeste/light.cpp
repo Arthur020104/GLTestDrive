@@ -43,6 +43,14 @@ void Light::setRot(const glm::vec3& newRot)
 		lightsThatWereUpdated->insert(this);
 	}
 }
+void Light::setColor(const glm::vec3& newColor)
+{
+	color = newColor;
+	if (lightsThatWereUpdated != nullptr)
+	{
+		lightsThatWereUpdated->insert(this);
+	}
+}
 /*void Light::setScale(const glm::vec3& newScale)
 {
 	TransformController::setScale(newScale);
