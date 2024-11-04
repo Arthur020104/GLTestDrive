@@ -55,10 +55,10 @@ void main()
         float attenuation = 1.0 / (1.0 + 0.1*distanceToLight + 0.01*distanceToLight*distanceToLight);
 
         float diffuseFactor = max(dot(transformedNormal, lightDirection), 0.0);
-        vec3 reflectedLight = normalize(reflect(-lightDirection, transformedNormal));
+        vec3 halfVector = normalize(lightDirection + viewDirection); 
 
         totalSpecularAndDiffuse += attenuation * lightsColorValues[i]* lightIntensity[i] * (diffuseFactor  +   
-        amountOfSpecular * pow(max(dot(viewDirection, reflectedLight), 0.0), roughness));
+        amountOfSpecular * diffuseFactor * pow(max(dot(transformedNormal, halfVector), 0.0), roughness));
 
         if(minDistance > distanceToLight)
         {
