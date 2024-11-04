@@ -19,7 +19,7 @@ class Scene
 {
 public:
     // Construtor da classe Scene
-    Scene(GameObject** objArr, const int& sizeObjArr, Light** lightArr, const int& sizeLightArr, Camera* camera, const glm::mat4& projection);
+    Scene(GameObject** objArr, const int& sizeObjArr, Camera* camera, const glm::mat4& projection);
 
     // Métodos de gerenciamento de cena
     void render();
@@ -29,8 +29,7 @@ private:
     std::vector<GameObject*> sceneObjs;
 
     // Array de luzes da cena
-    Light* sceneLights[MAX_LIGHTS];
-    int sizeOfLightsArr = 0;
+    std::vector<Light*> sceneLights;
 
     // Câmera principal
     Camera* mainCamera;
@@ -47,4 +46,5 @@ private:
 
     void updateLightsCache();
     void groupObjVectorByShader();
+    void updateLightsChangedCache();
 };

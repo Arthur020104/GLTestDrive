@@ -22,44 +22,47 @@
 //Separar luz objs no constructor
 
 
-Scene::Scene(GameObject** objArr, const int& sizeObjArr, Light** lightArr, const int& sizeLightArr, Camera* camera, const glm::mat4& projection)
+Scene::Scene(GameObject** objArr, const int& sizeObjArr, Camera* camera, const glm::mat4& projection)
 {
    
    // return;
     projectionMat = projection;
     mainCamera = camera;
 
-    if (sizeLightArr > MAX_LIGHTS) 
-    {
-        std::ostringstream oss;
-        oss << "[ERROR] MAX LIGHT SIZE is " << MAX_LIGHTS << " and you are passing " << sizeLightArr << " lights";
-        throw std::runtime_error(oss.str());
-    }
-
-    for (int i = 0; i < sizeLightArr; i++)
-    {
-        sceneLights[i] = lightArr[i];
-        sceneLights[i]->lightsThatWereUpdated = &lightsChanged;
-    }
-    sizeOfLightsArr = sizeLightArr;
  
     sceneObjs.resize(sizeObjArr);
     for (int i = 0; i < sizeObjArr; i++)
     {
         sceneObjs[i] = objArr[i];
+        Light* p = dynamic_cast<Light*>(objArr[i]);
+        if (p)
+            sceneLights.push_back(p);
     }
    
+    if (sceneLights.size() > MAX_LIGHTS)
+    {
+        std::ostringstream oss;
+        oss << "[ERROR] MAX LIGHT SIZE is " << MAX_LIGHTS << " and you are passing " << sceneLights.size() << " lights";
+        throw std::runtime_error(oss.str());
+    }
+
+    for (size_t i = 0; i < sceneLights.size(); i++)
+    {
+        sceneLights[i]->lightsThatWereUpdated = &lightsChanged;
+    }
+
     updateLightsCache();
 }
 
 
 void Scene::updateLightsCache()
 {
-    lightsPosWorldCache.resize(sizeOfLightsArr);
-    lightsColorsCache.resize(sizeOfLightsArr);
-    lightsIntensityCache.resize(sizeOfLightsArr);
+    size_t sizeOfLightsVec = sceneLights.size();
+    lightsPosWorldCache.resize(sizeOfLightsVec);
+    lightsColorsCache.resize(sizeOfLightsVec);
+    lightsIntensityCache.resize(sizeOfLightsVec);
 
-    for (int i = 0; i < sizeOfLightsArr; i++) 
+    for (int i = 0; i < sizeOfLightsVec; i++) 
     {
         lightsPosWorldCache[i] = sceneLights[i]->getPos() * glm::mat3(sceneLights[i]->getLightModelMat());
         lightsColorsCache[i] = sceneLights[i]->getColor();
@@ -68,13 +71,25 @@ void Scene::updateLightsCache()
   
 }
 
+void Scene::updateLightsChangedCache()
+{
+    for (auto element : lightsChanged)
+    {
+        auto it = std::find(sceneLights.begin(), sceneLights.end(), element);
+        size_t index = std::distance(sceneLights.begin(), it);
+        lightsPosWorldCache[index] = element->getPos() * glm::mat3(element->getLightModelMat());
+        lightsColorsCache[index] = element->getColor();
+        lightsIntensityCache[index] = element->getIntensity();
+    }
+    lightsChanged.clear();
+}
+
 void Scene::render()
 {
-    if (lightsChanged.size() > 0)//isso precisa ser otimizado atualizar apenas cache de luz que alterou 
-    {
-        updateLightsCache();
-        lightsChanged.clear();
-    }
+    if (lightsChanged.size() > 0)
+        updateLightsChangedCache();
+
+
     for (int i = 0; i < sceneObjs.size(); i++)
     {
         sceneObjs[i]->Update();
@@ -95,7 +110,7 @@ void Scene::render()
         {
             Shader* shaderProgram = sceneObjs[i]->getShaderPointer();
             shaderProgram->use();
-            shaderProgram->setInt("numberOfLights", sizeOfLightsArr);
+            shaderProgram->setInt("numberOfLights", sceneLights.size());
             shaderProgram->setFloatArray("lightIntensity", &lightsIntensityCache[0], lightsIntensityCache.size());
             shaderProgram->setArrayVec3("lightsColorValues", &lightsColorsCache[0], lightsColorsCache.size());
             shaderProgram->setArrayVec3("lightsPosWorld", &lightsPosWorldCache[0], lightsPosWorldCache.size());
