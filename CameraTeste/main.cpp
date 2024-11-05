@@ -391,18 +391,18 @@ int main()
 
 
     #pragma region Lights
-    Light l1 = Light(glm::vec3(25.0f, 100.0f, -25.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.65f, 0.011f), false, 200.0f);
-    Light l2 = Light(glm::vec3(25.0f, 5.0f, -130.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.011f, 1.0f, 0.011f), false, 25.0f);
-    Light l3 = Light(glm::vec3(-10.0f, 10.0f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.8f, 0.8f, 1.0f), false, 10.0f);
-    Light l4 = Light(glm::vec3(-240.0f, 10.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 10.0f);
-    Light l5 = Light(glm::vec3(-330.0f, 30.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 1000.0f);
-    Light l6 = Light(glm::vec3(0.0f, 8.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.3f), false, 10.9f);
-    Light l7 = Light(glm::vec3(0.0f, 820.0f, 350.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 1000.0f);
-    Light l8 = Light(glm::vec3(180.0f, 50.0f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 150.0f);
-    Light l9 = Light(glm::vec3(25.0f, 5.0f, -105.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.011f, 0.011f, 1.0f), false, 15.3f);
-    Light l10 = Light(glm::vec3(25.0f, 5.0f, -70.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.011f, 0.011f), false, 15.3f);
+    Light l1 = Light(glm::vec3(25.0f, 100.0f, -25.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.65f, 0.011f), false, 150.0f);
+    Light l2 = Light(glm::vec3(0.0f, 145.0f, -800.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.9f, 0.7f), false, 8000.0f);
+    Light l3 = Light(glm::vec3(-10.0f, 10.0f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.8f, 0.8f, 1.0f), false, 25.0f);
+    Light l4 = Light(glm::vec3(-240.0f, 10.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 25.0f);
+    Light l5 = Light(glm::vec3(-330.0f, 100.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 25.0f);
+    Light l6 = Light(glm::vec3(0.0f, 8.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.3f), false, 25.4f);
+    Light l7 = Light(glm::vec3(0.0f, 820.0f, 350.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 30.5f);
+    Light l8 = Light(glm::vec3(180.0f, 50.0f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 50.0f);
+    Light l9 = Light(glm::vec3(25.0f, 5.0f, -105.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.011f, 0.011f, 1.0f), false, 14.6f);
+    Light l10 = Light(glm::vec3(25.0f, 5.0f, -70.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.011f, 0.011f), false, 14.6f);
     Light* lights[10] = { &l1, &l2, &l3, &l4, &l5,&l6,&l7,&l8,&l9,&l10 };
-    l8.setUpdateFunc(&dinamicLightUpdate);
+    l7.setUpdateFunc(&dinamicLightUpdate);
     #pragma endregion
 
     #pragma region GameObjects
@@ -421,7 +421,7 @@ int main()
     obj.setTextures(texture, sizeof(texture), pathss, 1);
     obj.setScale(obj.getScale()* glm::fvec1(2));
 
-    GameObject teapot = GameObject(glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 180.0f), teapotVertices, teapot_count, DEFAULT_SHADER_REFERENCE, false);
+    GameObject teapot = GameObject(glm::vec3(5.0f, 5.0f, -5.0f), glm::vec3(0.0f, 0.0f, 180.0f), teapotVertices, teapot_count, DEFAULT_SHADER_REFERENCE, false);
     teapot.setUpdateFunc(&objUpdate);
     teapot.setAftherUpdateFunc(&objAftherUpdate);
     teapot.setMaterial(&veryRoughBlue);
@@ -434,6 +434,10 @@ int main()
     wall.setScale(glm::vec3(500.0f, 500.0f, 1.0f));
     wall.setMaterial(&veryShine);
 
+    GameObject wall2 = GameObject(glm::vec3(250.0f, 248.5f, 0.0f), glm::vec3(0.0f, 90.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
+    wall2.setScale(glm::vec3(500.0f, 500.0f, 1.0f));
+    wall2.setMaterial(&veryRoughGray);
+
     GameObject bigBlock = GameObject(glm::vec3(100.0f, 100.5f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
     bigBlock.setScale(glm::vec3(50.0f, 50.0f, 50.0f));
     bigBlock.setMaterial(&veryShine);
@@ -443,14 +447,14 @@ int main()
     bigBlock2.setScale(glm::vec3(50.0f, 50.0f, 50.0f));
     bigBlock2.setMaterial(&veryShineBlue);
 
-    GameObject* arr[16] = { &obj, &teapot, &ground, &wall, &bigBlock, &bigBlock2};
+    GameObject* arr[17] = { &obj, &teapot, &ground, &wall, &bigBlock, &bigBlock2, &wall2};
 
     // Adicionando representação das luzes
     for (int i = 0; i < 10; i++) 
     {
         //lights[i]->getPos() 
         lights[i]->enablePhysicalRepresentation(vertices, numVertices, &LightShader);
-        lights[i]->setScale(lights[i]->getScale()* glm::fvec1(lights[i]->getIntensity()/10));
+        lights[i]->setScale(lights[i]->getScale()* glm::fvec1(lights[i]->getIntensity()/20));
         if (i == 0)
         {
            
@@ -460,27 +464,26 @@ int main()
         }
        
         //lights[i]->setTextures()
-        arr[i + 6] = lights[i];
+        arr[i + 7] = lights[i];
     }
 
+    l2.setModelMatixMode(1);// set different type of model matrix to rotate around origin
     #pragma endregion
     float lightSpeed = -55.0f;
-    Scene mainScene(arr, 16, lights, 10, &cameraInst, PROJECTION);
-
+    Scene mainScene(arr, 17, &cameraInst, PROJECTION);
 
     while (!glfwWindowShouldClose(Window))
     {
         processInput(Window);
-
-        glClearColor(0.5f, 0.5f, 1.0f, 0.0f);
+       
+        glClearColor(0.1f, 0.1f, 0.3f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         float timeValue = glfwGetTime();
         DeltaTime = timeValue - LastTime;
         LastTime = timeValue;
             
-        
-
+        l2.setRot(l2.getRot() + glm::vec3(1000.0f * DeltaTime,0.0f, 0.0f));
 
 
         fpsLog();

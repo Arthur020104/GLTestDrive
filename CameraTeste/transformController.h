@@ -23,7 +23,9 @@ public:
 	virtual void setRot(const glm::vec3& newRot);
 	virtual void setScale(const glm::vec3& newScale);
 
+	virtual void setModelMatixMode(const unsigned short& newModelMatrixMode);
 
+	void updateModelMatrix();
 
 private:
 	glm::vec3 objPos;
@@ -35,6 +37,7 @@ private:
 
 	glm::mat4 ModelMatrix;
 
+	unsigned short modelMatrixMode = 0;
 
-	void updateModelMatrix();
+	
 };

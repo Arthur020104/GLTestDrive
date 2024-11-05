@@ -37,7 +37,7 @@ void Light::setPos(const glm::vec3& newPos)
 void Light::setRot(const glm::vec3& newRot)
 {
 	TransformController::setRot(newRot);
-	lightTransform.setRot(newRot);
+	lightTransform.setRot(-newRot);
 	if (lightsThatWereUpdated != nullptr)
 	{
 		lightsThatWereUpdated->insert(this);
@@ -51,14 +51,15 @@ void Light::setColor(const glm::vec3& newColor)
 		lightsThatWereUpdated->insert(this);
 	}
 }
-/*void Light::setScale(const glm::vec3& newScale)
+void Light::setModelMatixMode(const unsigned short& newModelMatrixMode)
 {
-	TransformController::setScale(newScale);
+	TransformController::setModelMatixMode(newModelMatrixMode);
+	lightTransform.setModelMatixMode(newModelMatrixMode);
 	if (lightsThatWereUpdated != nullptr)
 	{
 		lightsThatWereUpdated->insert(this);
 	}
-}*/
+}
 void Light::prepareRender()
 {
 	GameObject::mustHaveRenderAtribb("prepareRender");
