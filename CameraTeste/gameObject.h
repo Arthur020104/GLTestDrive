@@ -62,6 +62,7 @@ public:
     void setMaterial(Material* newMaterial);
     void setUpdateFunc(std::function<void(GameObject*)> func);
     void setAftherUpdateFunc(std::function<void(GameObject*)> func);
+    void setBeforeUpdateFunc(std::function<void(GameObject*)> func);
     virtual void prepareRender();
     void setTextures(const float* textureCoords, const int& sizeOftextureCoords, const char** paths, const int& numberOfTextures);
     void updateNormals();
@@ -80,6 +81,7 @@ private:
 
     std::function<void(GameObject*)> updateFunc;
     std::function<void(GameObject*)> aftherUpdateFunc;
+    std::function<void(GameObject*)> beforeUpdateFunc;
    
     Material* material = &DEFAULT_MATERIAL;
 

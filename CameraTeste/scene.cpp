@@ -92,6 +92,7 @@ void Scene::render()
 
     for (int i = 0; i < sceneObjs.size(); i++)
     {
+        sceneObjs[i]->BeforeUpdate();
         sceneObjs[i]->Update();
         sceneObjs[i]->AftherUpdate();
     }

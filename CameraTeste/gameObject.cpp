@@ -212,14 +212,28 @@ void GameObject::setUpdateFunc(std::function<void(GameObject*)> func)
 {
     updateFunc = func;
 }
+void GameObject::BeforeUpdate()
+{
+    if (beforeUpdateFunc != nullptr)
+    {
+        beforeUpdateFunc(this);
+    }
+
+}
+
+void GameObject::setBeforeUpdateFunc(std::function<void(GameObject*)> func)
+{
+    beforeUpdateFunc = func;
+}
 void GameObject::Update()
 {
     if (updateFunc != nullptr)
     {
         updateFunc(this);
     }
-    
+
 }
+
 void GameObject::setAftherUpdateFunc(std::function<void(GameObject*)> func)
 {
     aftherUpdateFunc = func;
