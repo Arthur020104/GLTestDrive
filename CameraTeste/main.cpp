@@ -36,7 +36,7 @@
 
 
 // Constantes de tempo e janela
-Material DEFAULT_MATERIAL = Material();
+Material DEFAULT_MATERIAL;
 
 const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 720;
@@ -406,8 +406,9 @@ int main()
     #pragma endregion
 
     #pragma region GameObjects
+    // Material(ambientV = DEFAULT_AMBIENT,diffuseV = DEFAULT_DIFFUSE,colorV = DEFAULT_COLOR,roughnessAmt = DEFAULT_ROUGHNESS,amtOfSpecular = DEFAULT_SPECULAR_AMOUNT)
     //Material(const glm::vec4& colorV, const float& roughnessAmt, const float& amtOfSpecular)
-    Material veryShine(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f), 20, 25);
+    Material veryShine(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f), 20.0f, 25.0f);
 
     Material veryShineBlue(glm::vec4(0.0999f, 0.09991f, 0.35f, 1.0f), 20, 250);
 
@@ -483,7 +484,7 @@ int main()
         DeltaTime = timeValue - LastTime;
         LastTime = timeValue;
             
-        l2.setRot(l2.getRot() + glm::vec3(1000.0f * DeltaTime,0.0f, 0.0f));
+        l2.setRot(l2.getRot() + glm::vec3(100.0f * DeltaTime,0.0f, 0.0f));
 
 
         fpsLog();
@@ -525,7 +526,7 @@ int main()
 
 void fpsLog()
 {
-    DeltatimeMean = (DeltatimeMean * 0.2f + DeltaTime * 0.8f) / 2.0f;
+    DeltatimeMean = (DeltatimeMean * 0.9f + DeltaTime * 0.1f) / 2.0f;
     FpsSampleCounter++;
     if (FpsSampleCounter >= AMOUNT_OF_SAMPLES_TO_COUNT_FPS)
     {

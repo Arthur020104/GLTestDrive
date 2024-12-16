@@ -186,11 +186,17 @@ void GameObject::prepareRender()
 
     this->shaderProgram->setMat3("model3", glm::mat3(model));
 
-    shaderProgram->setVec4("color",material->color);
+    /*Material things*/
+    shaderProgram->setVec4("material.color",material->color);
 
-    shaderProgram->setFloat("roughness", material->roughness);
+    shaderProgram->setFloat("material.roughness", material->roughness);
 
-    shaderProgram->setFloat("amountOfSpecular", material->amountOfSpecular);
+    shaderProgram->setVec3("material.amountOfSpecular", material->amountOfSpecular);
+
+    shaderProgram->setVec3("material.diffuse", material->diffuse);
+
+    shaderProgram->setVec3("material.ambient", material->ambient);
+    /*Material things*/
 
     for (int i = 0; i < texturesIds.size(); i++)
     {

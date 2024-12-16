@@ -112,6 +112,16 @@ void Scene::render()
             Shader* shaderProgram = sceneObjs[i]->getShaderPointer();
             shaderProgram->use();
             shaderProgram->setInt("numberOfLights", sceneLights.size());
+
+            for (int i = 0; i < sceneLights.size(); ++i) 
+            {
+                std::string baseName = "lights[" + std::to_string(i) + "]";
+                shaderProgram->setVec3(baseName + ".positionWorld", lightsPosWorldCache[i]);
+                shaderProgram->setVec3(baseName + ".colorValue", lightsColorsCache[i]);
+                shaderProgram->setFloat(baseName + ".intensity", lightsIntensityCache[i]);
+            }
+
+
             shaderProgram->setFloatArray("lightIntensity", &lightsIntensityCache[0], lightsIntensityCache.size());
             shaderProgram->setArrayVec3("lightsColorValues", &lightsColorsCache[0], lightsColorsCache.size());
             shaderProgram->setArrayVec3("lightsPosWorld", &lightsPosWorldCache[0], lightsPosWorldCache.size());
