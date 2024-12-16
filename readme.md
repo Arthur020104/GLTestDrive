@@ -1,6 +1,6 @@
 # Test Environment
 
-*Note: The GIFs may take some time to load, as this project README is based on GIFs.*
+*Note: The README may take some time to load as each section contains a GIF.*
 
 ## General Test Environment
 ![Test Environment](Gif/MundoDeTestes.gif)
