@@ -1,8 +1,6 @@
 #pragma once
 
-// Implementação da biblioteca STB para carregar imagens
-#define STB_IMAGE_IMPLEMENTATION
-#include "Libs/stb_image.h"
+
 
 // Bibliotecas OpenGL e GLM
 #include <glad/glad.h>
@@ -21,42 +19,13 @@
 #include <vector>
 
 
-void generateTexture(unsigned int& texture, const char* path)
-{
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
-    if (!data)
-    {
-        std::cout << "Could not load texture: " << path << "\n";
-        return;
-    }
-    std::cout << path << "\n";
-
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Adjust texture format based on the number of channels
-    GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
-
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    stbi_image_free(data);
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
 GameObject::GameObject(const glm::vec3& inicialPos, const glm::vec3& inicialRot, const float* vertices, const int& numVertices, Shader* shaderProgramRef, const bool& isStatic) : TransformController(inicialPos, inicialRot)
 {
     //Make EBO OPTMIZATION
     isStaticObj = isStatic;
     
     enablePhysicalRepresentation(vertices, numVertices, shaderProgramRef);
+    enableTexturesCoords();
 }
 void GameObject::enablePhysicalRepresentation(const float* vertices, const int& numVertices, Shader* shaderProgramRef)
 {
@@ -101,10 +70,10 @@ void GameObject::enablePhysicalRepresentation(const float* vertices, const int& 
 
 GameObject::~GameObject()
 {
-    for (int textureId : texturesIds)
+    /*for (int textureId : texturesIds)
     {
         glDeleteTextures(1, (GLuint *)&textureId);
-    }
+    }*/
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     if (verticesObj)
@@ -115,96 +84,134 @@ GameObject::~GameObject()
     }
     
 }
-void GameObject::setTextures(const float* textureCoords, const int& sizeOftextureCoords, const char** paths, const int& numberOfTextures)
-{
-    this->mustHaveRenderAtribb("setTextures");
-
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-    size_t sizeOfNormals = vertexNormals.size() * sizeof(float);
-
-    glBufferData(GL_ARRAY_BUFFER, sizeOfVerticesObj + sizeOfNormals + sizeOftextureCoords, nullptr, isStaticObj ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
-
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeOfVerticesObj, verticesObj);
-
-    glBufferSubData(GL_ARRAY_BUFFER, sizeOfVerticesObj, sizeOfNormals, &vertexNormals[0]);
-
-    glBufferSubData(GL_ARRAY_BUFFER, sizeOfVerticesObj + sizeOfNormals, sizeOftextureCoords, textureCoords);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(sizeOfVerticesObj));
-    glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(sizeOfVerticesObj + sizeOfNormals));
-    glEnableVertexAttribArray(2);
-   
-   
-
-    
-
-    texturesIds.reserve(numberOfTextures);
-
-    
-
-    // Vetor para testes de blending
-    std::vector<float> blend;
-    blend.reserve(numberOfTextures);
-
-    std::vector<int> textureUnits;
-    textureUnits.reserve(numberOfTextures);
-
-    for (int i = 0; i < numberOfTextures; i++)
+void GameObject::enableTexturesCoords()
     {
-        unsigned int texturesId;
-        generateTexture(texturesId, paths[i]);
-     
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, texturesId);
+    float texture[] = {
+        // Coordenadas de textura
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        1.0f, 1.0f,
+        1.0f, 1.0f,
+        0.0f, 1.0f,
+        0.0f, 0.0f,
 
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        1.0f, 1.0f,
+        1.0f, 1.0f,
+        0.0f, 1.0f,
+        0.0f, 0.0f,
 
-        texturesIds.push_back(texturesId);
-        textureUnits.push_back(i);
+        1.0f, 0.0f,
+        1.0f, 1.0f,
+        0.0f, 1.0f,
+        0.0f, 1.0f,
+        0.0f, 0.0f,
+        1.0f, 0.0f,
 
-        // Valores de blend de teste
-        blend.push_back(0.5f);
-    }
+        1.0f, 0.0f,
+        1.0f, 1.0f,
+        0.0f, 1.0f,
+        0.0f, 1.0f,
+        0.0f, 0.0f,
+        1.0f, 0.0f,
 
+        0.0f, 1.0f,
+        1.0f, 1.0f,
+        1.0f, 0.0f,
+        1.0f, 0.0f,
+        0.0f, 0.0f,
+        0.0f, 1.0f,
+
+        0.0f, 1.0f,
+        1.0f, 1.0f,
+        1.0f, 0.0f,
+        1.0f, 0.0f,
+        0.0f, 0.0f,
+        0.0f, 1.0f
+    };
+        this->mustHaveRenderAtribb("setTextures");
+
+        glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+        size_t sizeOfNormals = vertexNormals.size() * sizeof(float);
+
+        glBufferData(GL_ARRAY_BUFFER, sizeOfVerticesObj + sizeOfNormals + sizeof(texture), nullptr, isStaticObj ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeOfVerticesObj, verticesObj);
+
+        glBufferSubData(GL_ARRAY_BUFFER, sizeOfVerticesObj, sizeOfNormals, &vertexNormals[0]);
+
+        glBufferSubData(GL_ARRAY_BUFFER, sizeOfVerticesObj + sizeOfNormals, sizeof(texture), texture);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+        glEnableVertexAttribArray(0);
+
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(sizeOfVerticesObj));
+        glEnableVertexAttribArray(1);
+
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(sizeOfVerticesObj + sizeOfNormals));
+        glEnableVertexAttribArray(2);
    
-    glBindVertexArray(0);
-}
+   
+
+    /*
+
+        texturesIds.reserve(numberOfTextures);
+
+    
+
+        // Vetor para testes de blending
+        std::vector<float> blend;
+        blend.reserve(numberOfTextures);
+
+        std::vector<int> textureUnits;
+        textureUnits.reserve(numberOfTextures);
+
+        for (int i = 0; i < numberOfTextures; i++)
+        {
+            unsigned int texturesId;
+            generateTexture(texturesId, paths[i]);
+     
+            glActiveTexture(GL_TEXTURE0 + i);
+            glBindTexture(GL_TEXTURE_2D, texturesId);
+
+
+            texturesIds.push_back(texturesId);
+            textureUnits.push_back(i);
+
+            // Valores de blend de teste
+            blend.push_back(0.5f);
+        }
+
+   */
+        glBindVertexArray(0);
+    }
 void GameObject::prepareRender()
 {
+    glBindVertexArray(VAO);
     this->mustHaveRenderAtribb("prepareRender");
 
     shaderProgram->use();
 
     glm::mat4 model = this->getModelMatrix();
+
     this->shaderProgram->setMat4("model", model);
 
     this->shaderProgram->setMat3("model3", glm::mat3(model));
 
     /*Material things*/
-    shaderProgram->setVec4("material.color",material->color);
-
-    shaderProgram->setFloat("material.roughness", material->roughness);
-
-    shaderProgram->setVec3("material.amountOfSpecular", material->amountOfSpecular);
-
-    shaderProgram->setVec3("material.diffuse", material->diffuse);
-
-    shaderProgram->setVec3("material.ambient", material->ambient);
+    material->LoadMaterialDataToShader(shaderProgram);
     /*Material things*/
 
-    for (int i = 0; i < texturesIds.size(); i++)
+    /*for (int i = 0; i < texturesIds.size(); i++)
     {
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, texturesIds[i]);
-    }
-    glBindVertexArray(VAO);
-}
+    }*/
+    
+}/*
 void GameObject::disableTextures()
 {
     for (int i = 0; i < texturesIds.size(); i++)
@@ -213,7 +220,7 @@ void GameObject::disableTextures()
         glBindTexture(GL_TEXTURE_2D, 0); // Desvinculando a textura
     }
 
-}
+}*/
 void GameObject::setUpdateFunc(std::function<void(GameObject*)> func)
 {
     updateFunc = func;
@@ -225,6 +232,11 @@ void GameObject::BeforeUpdate()
         beforeUpdateFunc(this);
     }
 
+}
+void GameObject::Unbind()
+{
+    glBindVertexArray(0);
+    material->UnbindMaterial();
 }
 
 void GameObject::setBeforeUpdateFunc(std::function<void(GameObject*)> func)
@@ -361,10 +373,10 @@ unsigned int GameObject::getVBO()
 {
     return VBO;
 }
-std::vector<unsigned int>* GameObject::getTextureIds()
+/*std::vector<unsigned int>* GameObject::getTextureIds()
 {
     return &texturesIds;
-}
+}*/
 void GameObject::setMaterial(Material* newMaterial)
 {
     material = newMaterial;

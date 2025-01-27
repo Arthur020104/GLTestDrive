@@ -64,20 +64,21 @@ public:
     void setAftherUpdateFunc(std::function<void(GameObject*)> func);
     void setBeforeUpdateFunc(std::function<void(GameObject*)> func);
     virtual void prepareRender();
-    void setTextures(const float* textureCoords, const int& sizeOftextureCoords, const char** paths, const int& numberOfTextures);
+    //void setTextures(const float* textureCoords, const int& sizeOftextureCoords, const char** paths, const int& numberOfTextures);
     void updateNormals();
     int getVerticesNum();
     Shader* getShaderPointer() const;
     void enablePhysicalRepresentation(const float* vertices, const int& numVertices, Shader* shaderProgramRef);
-    void disableTextures();
+    //void disableTextures();
     bool hasRenderAtribs();
+    void Unbind();
 private:
     // Variáveis privadas
     std::vector<float> vertexNormals;
     int sizeOfVerticesObj = -1;
     float* verticesObj = nullptr;
     bool isStaticObj;
-    std::vector<unsigned int> texturesIds;
+    //std::vector<unsigned int> texturesIds;
 
     std::function<void(GameObject*)> updateFunc;
     std::function<void(GameObject*)> aftherUpdateFunc;
@@ -85,20 +86,20 @@ private:
    
     Material* material = &DEFAULT_MATERIAL;
 
-    unsigned int VAO;
-    unsigned int VBO;
+    
     Shader* shaderProgram = nullptr;
     int verticesNum = -1; // Defaults to -1 to throw an error if the object requires vertices but has none.
 
     // Métodos privados
    
-
+    void enableTexturesCoords();
 protected:
+    unsigned int VAO;
+    unsigned int VBO;
     void mustHaveRenderAtribb(std::string methodName);
     unsigned int getVAO();
     unsigned int getVBO();
-    std::vector<unsigned int>* getTextureIds();
+    //std::vector<unsigned int>* getTextureIds();
 };
 
-// Declaração de funções
-void generateTexture(unsigned int& texture, const char* path);
+
