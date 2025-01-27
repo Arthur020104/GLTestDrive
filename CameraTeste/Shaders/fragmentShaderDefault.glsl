@@ -25,6 +25,11 @@ struct Material
     sampler2D specular;
     float roughness;
     vec4 color;
+    float diffuseMulti;
+    float specularMulti;
+
+    bool hasSpecularMap;
+    bool hasDiffuseMap;
 }; 
 
 uniform Material material; // Material properties uniform
@@ -62,18 +67,25 @@ void CalculateLight()
         float attenuation = 1.0 / (1.0 + 0.1 * distanceToLight + 0.01 * distanceToLight * distanceToLight);
 
         float diffuseFactor = max(dot(transformedNormal, lightDirection), 0.0);
-        vec3 materialScaledDiffuse = vec3(texture(material.diffuse, TextureCoord));
-        if (materialScaledDiffuse == vec3(0.0)) 
+
+        vec3 materialScaledDiffuse = vec3(texture(material.diffuse, TextureCoord)) * material.diffuseMulti * diffuseFactor;
+        if (!material.hasDiffuseMap) 
         {
-            materialScaledDiffuse = vec3(1) * diffuseFactor;
+            materialScaledDiffuse = vec3(material.diffuseMulti) * diffuseFactor;
         }
 
+
         vec3 halfVector = normalize(lightDirection + viewDirection); // Halfway vector
-        float specularFactor = pow(max(dot(transformedNormal, halfVector), 0.0), material.roughness);
+
+        vec3 specularFactor = vec3(texture(material.specular, TextureCoord)) * pow(max(dot(transformedNormal, halfVector), 0.0), material.roughness) * material.specularMulti;
+        if (!material.hasSpecularMap) 
+        {
+            specularFactor = vec3(material.specularMulti) * pow(max(dot(transformedNormal, halfVector), 0.0), material.roughness) ;
+        }
 
         totalSpecularAndDiffuse += attenuation * lights[i].intensity * 
                                    (materialScaledDiffuse * lights[i].diffuse +
-                                   vec3(texture(material.specular, TextureCoord)) * lights[i].specular * specularFactor);
+                                    lights[i].specular * specularFactor);
 
         if (minDistance > distanceToLight || i == 0) 
         { 
@@ -81,8 +93,14 @@ void CalculateLight()
             indexClosest = i;
         }
     }
+    
 
-    totalAmbientLight = vec3(texture(material.diffuse, TextureCoord)) * lights[indexClosest].ambient;
+    totalAmbientLight = vec3(texture(material.diffuse, TextureCoord)) * lights[indexClosest].ambient * material.ambient;
+
+    if(!material.hasDiffuseMap)
+    {
+        totalAmbientLight = material.ambient * lights[indexClosest].ambient ;
+    }
 }
 
 
@@ -90,9 +108,7 @@ void main()
 {
     CalculateLight();
 
-    vec4 baseColor = (vec3(texture(material.diffuse, TextureCoord)) != vec3(0.0)) 
-                     ? vec4(vec3(texture(material.diffuse, TextureCoord)) * 0.9, 1.0) 
-                     : material.color;
+    vec4 baseColor = material.color;
 
     FragColor = baseColor * (vec4(totalSpecularAndDiffuse, 1.0) + vec4(totalAmbientLight, 1.0));
 }

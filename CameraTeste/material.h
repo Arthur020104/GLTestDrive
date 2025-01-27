@@ -18,11 +18,6 @@ const glm::vec3 DEFAULT_SPECULAR_VEC = glm::vec3(DEFAULT_SPECULAR_AMOUNT);
 class Material
 {
 public:
-    glm::vec3 ambient;
-    
-    float roughness;
-    
-    glm::vec4 color;
 
     // Construtor principal
     Material(const glm::vec4& colorV = DEFAULT_COLOR, const float& roughnessAmt = DEFAULT_ROUGHNESS, const glm::vec3& ambientV = DEFAULT_AMBIENT) :
@@ -33,14 +28,28 @@ public:
     void LoadMaterialDataToShader(Shader* s);
 
     void LoadDiffuseMap(const char* path);
-    void LoadSpecular(const char* path);
+    void LoadSpecularMap(const char* path);
+
     //createDisable texture ;
     void UnbindMaterial();
 private:
+    float diffuseMulti = 1.0f;
+    float specularMulti = 1.0f;
+    bool hasDiffuseMap = false;
+    bool hasSpecularMap = false;
+
     unsigned int diffuseMap;
     int diffuse;
     unsigned int specularMap;
     int specular;
+
+    glm::vec3 ambient;
+
+    float roughness;
+
+    glm::vec4 color;
+
+
     unsigned int generateTexture(const char* path);
     
 };

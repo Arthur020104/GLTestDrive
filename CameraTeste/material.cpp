@@ -19,6 +19,12 @@ void Material::LoadMaterialDataToShader(Shader* s)
 
     s->setVec4("material.color", this->color);
     s->setFloat("material.roughness", this->roughness);
+    s->setFloat("material.diffuseMulti", this->diffuseMulti);
+    s->setFloat("material.specularMulti", this->specularMulti);
+
+    s->setBool("material.hasSpecularMap", this->hasSpecularMap);
+    s->setBool("material.hasDiffuseMap", this->hasDiffuseMap);
+
     s->setInt("material.specular", this->specular);
 
     s->setInt("material.diffuse", diffuse);
@@ -96,9 +102,11 @@ void Material::LoadDiffuseMap(const char* path)
     else
     {
         this->diffuseMap = texture;
+        hasDiffuseMap = true;
     }
+   
 }
-void Material::LoadSpecular(const char* path)
+void Material::LoadSpecularMap(const char* path)
 {
     unsigned int textureS = generateTexture(path);
     if (textureS == 0)
@@ -108,5 +116,6 @@ void Material::LoadSpecular(const char* path)
     else
     {
         this->specularMap = textureS;
+        hasSpecularMap = true;
     }
 }

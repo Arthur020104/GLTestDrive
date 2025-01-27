@@ -414,7 +414,7 @@ int main()
 
     #pragma region Lights
     Light l1 = Light(glm::vec3(25.0f, 100.0f, -25.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.65f, 0.011f), false, 5.0f);
-    Light l2 = Light(glm::vec3(0.0f, 145.0f, -800.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.9f, 0.7f), false, 5.0f);
+    Light l2 = Light(glm::vec3(0.0f, 145.0f, -800.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.9f, 0.7f), false, 5000.0f);
     Light l3 = Light(glm::vec3(-10.0f, 10.0f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.8f, 0.8f, 1.0f), false, 5.0f);
     Light l4 = Light(glm::vec3(-240.0f, 10.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 5.0f);
     Light l5 = Light(glm::vec3(-330.0f, 100.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 5.0f);
@@ -446,7 +446,7 @@ int main()
     const char* pathss = { "C:/Users/arthu/Downloads/container2.png" };
     const char* paths = { "C:/Users/arthu/Downloads/container2_specular.png" };
     Box.LoadDiffuseMap(pathss);
-    Box.LoadSpecular(paths);
+    Box.LoadSpecularMap(paths);
     obj.setScale(obj.getScale()* glm::fvec1(10));
     obj.setMaterial(&Box);
 
