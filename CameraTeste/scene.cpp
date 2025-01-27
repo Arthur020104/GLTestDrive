@@ -62,24 +62,38 @@ void Scene::updateLightsCache()
     lightsColorsCache.resize(sizeOfLightsVec);
     lightsIntensityCache.resize(sizeOfLightsVec);
 
+    lightsAmbientCache.resize(sizeOfLightsVec);
+    lightsDiffuseCache.resize(sizeOfLightsVec);
+    lightsSpecularCache.resize(sizeOfLightsVec);
+
     for (int i = 0; i < sizeOfLightsVec; i++) 
     {
         lightsPosWorldCache[i] = sceneLights[i]->getPos() * glm::mat3(sceneLights[i]->getLightModelMat());
         lightsColorsCache[i] = sceneLights[i]->getColor();
         lightsIntensityCache[i] = sceneLights[i]->getIntensity();
+
+        lightsAmbientCache[i] = sceneLights[i]->getAmbient();
+        lightsDiffuseCache[i] = sceneLights[i]->getDiffuse();
+        lightsSpecularCache[i] = sceneLights[i]->getSpecular();
     }
   
 }
-
+void Scene :: updateElementCache(Light* element)
+{
+    auto it = std::find(sceneLights.begin(), sceneLights.end(), element);
+    size_t index = std::distance(sceneLights.begin(), it);
+    lightsPosWorldCache[index] = element->getPos() * glm::mat3(element->getLightModelMat());
+    lightsColorsCache[index] = element->getColor();
+    lightsIntensityCache[index] = element->getIntensity();
+    lightsAmbientCache[index] = element->getAmbient();
+    lightsDiffuseCache[index] = element->getDiffuse();
+    lightsSpecularCache[index] = element->getSpecular();
+}
 void Scene::updateLightsChangedCache()
 {
     for (auto element : lightsChanged)
     {
-        auto it = std::find(sceneLights.begin(), sceneLights.end(), element);
-        size_t index = std::distance(sceneLights.begin(), it);
-        lightsPosWorldCache[index] = element->getPos() * glm::mat3(element->getLightModelMat());
-        lightsColorsCache[index] = element->getColor();
-        lightsIntensityCache[index] = element->getIntensity();
+        updateElementCache(element);
     }
     lightsChanged.clear();
 }
@@ -107,6 +121,7 @@ void Scene::render()
         sceneObjs[i]->prepareRender();
 
         glm::mat4 viewMatrix = mainCamera->getViewMatrix();
+        glm::vec3 cameraPos = mainCamera->getPos();
         if (i == 0 || sceneObjs[i - 1]->getShaderPointer() != sceneObjs[i]->getShaderPointer()) 
         {
             Shader* shaderProgram = sceneObjs[i]->getShaderPointer();
@@ -119,12 +134,13 @@ void Scene::render()
                 shaderProgram->setVec3(baseName + ".positionWorld", lightsPosWorldCache[i]);
                 shaderProgram->setVec3(baseName + ".colorValue", lightsColorsCache[i]);
                 shaderProgram->setFloat(baseName + ".intensity", lightsIntensityCache[i]);
+
+
+                shaderProgram->setVec3(baseName + ".ambient", lightsAmbientCache[i]);
+                shaderProgram->setVec3(baseName + ".diffuse", lightsDiffuseCache[i]);
+                shaderProgram->setVec3(baseName + ".specular", lightsSpecularCache[i]);
             }
-
-
-            shaderProgram->setFloatArray("lightIntensity", &lightsIntensityCache[0], lightsIntensityCache.size());
-            shaderProgram->setArrayVec3("lightsColorValues", &lightsColorsCache[0], lightsColorsCache.size());
-            shaderProgram->setArrayVec3("lightsPosWorld", &lightsPosWorldCache[0], lightsPosWorldCache.size());
+            shaderProgram->setVec3("cameraPos", cameraPos);
             shaderProgram->setMat4("projection", projectionMat);
             shaderProgram->setMat4("view", viewMatrix);
             shaderProgram->setMat3("view3", glm::mat3(viewMatrix));
@@ -132,8 +148,8 @@ void Scene::render()
         }
 
         glDrawArrays(GL_TRIANGLES, 0, sceneObjs[i]->getVerticesNum() / 3);
-        glBindVertexArray(0);
-        sceneObjs[i]->disableTextures();
+        
+        sceneObjs[i]->Unbind();
     }
 
     

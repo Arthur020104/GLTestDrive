@@ -8,7 +8,7 @@
 
 // Definições de constantes
 #include "main.h"
-const glm::vec3 DEFAULT_TARGET = glm::vec3(0, 0, FAR_FRUSTUM);
+const glm::vec3 DEFAULT_TARGET = glm::vec3(0, FAR_FRUSTUM, FAR_FRUSTUM);
 
 // Definição da classe Camera
 class Camera 

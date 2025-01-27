@@ -40,11 +40,15 @@ private:
     // Caches para propriedades das luzes
     std::vector<glm::vec3> lightsPosWorldCache;
     std::vector<glm::vec3> lightsColorsCache;
+    std::vector<glm::vec3> lightsSpecularCache;
+    std::vector<glm::vec3> lightsDiffuseCache;
+    std::vector<glm::vec3> lightsAmbientCache;
     std::vector<float> lightsIntensityCache;
 
     std::set<Light*> lightsChanged;
 
-    void updateLightsCache();
+    void updateLightsCache();//should be call when all cache elements needs to be updated, call it when add new object
     void groupObjVectorByShader();
-    void updateLightsChangedCache();
+    void updateLightsChangedCache();//should be call when a element on cache is changed
+    void updateElementCache(Light* element);
 };

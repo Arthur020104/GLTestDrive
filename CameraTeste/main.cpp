@@ -215,6 +215,28 @@ void keyInput()
     
 
 }
+void l9Func(GameObject* obj)
+{
+    
+    if (glfwGetMouseButton(Window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+    {
+        
+        obj->setPos(obj->getPos() + glm::fvec1(Speed * DeltaTime) * cameraInst.right());
+    }
+    else if (glfwGetMouseButton(Window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+    {
+        obj->setPos(obj->getPos() + glm::fvec1(-Speed * DeltaTime) * cameraInst.right());
+    }
+    if (scrolling && scrollingUp)
+    {
+        
+        obj->setPos(obj->getPos() + glm::fvec1(Speed *10 * DeltaTime) * glm::vec3(0.0f,1.0f,0.0f));
+    }
+    else if (scrolling)
+    {
+        obj->setPos(obj->getPos() + glm::fvec1(-Speed * 10 * DeltaTime) * glm::vec3(0.0f, 1.0f, 0.0f));
+    }
+}
 void cameraMovement()
 {
     double xpos, ypos;
@@ -228,6 +250,7 @@ void cameraMovement()
 
     cameraInst.horizontalRotation(HorizontalSens* DeltaTime* (LastXPos - xpos));
     cameraInst.verticalRotation(HorizontalSens * DeltaTime * (LastYPos - ypos));
+    
     LastXPos = xpos; LastYPos = ypos;
 }
 
@@ -266,7 +289,7 @@ int init(GLFWwindow** window)
     //Avisando ao GLFW que queremos que essa funcao seja chamada toda vez que a janela eh redimensionada
     glfwSetFramebufferSizeCallback(*window, framebufferSizeCallback);
     glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
+    glfwSetScrollCallback(*window, scrollCallback);
 
     /*******************Set GLFW********************/
     /*******************Set GLAD********************/
@@ -382,7 +405,6 @@ int main()
         0.0f, 0.0f,
         0.0f, 1.0f
     };
-    
 
     Shader DefaultShader("Shaders/vertexShaderDefault.glsl", "Shaders/fragmentShaderDefault.glsl");
     Shader LightShader("Shaders/vertexShaderDefault.glsl", "Shaders/fragmentShaderLight.glsl");
@@ -391,41 +413,49 @@ int main()
 
 
     #pragma region Lights
-    Light l1 = Light(glm::vec3(25.0f, 100.0f, -25.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.65f, 0.011f), false, 150.0f);
-    Light l2 = Light(glm::vec3(0.0f, 145.0f, -800.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.9f, 0.7f), false, 8000.0f);
-    Light l3 = Light(glm::vec3(-10.0f, 10.0f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.8f, 0.8f, 1.0f), false, 25.0f);
-    Light l4 = Light(glm::vec3(-240.0f, 10.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 25.0f);
-    Light l5 = Light(glm::vec3(-330.0f, 100.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 25.0f);
-    Light l6 = Light(glm::vec3(0.0f, 8.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.3f), false, 25.4f);
-    Light l7 = Light(glm::vec3(0.0f, 820.0f, 350.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 30.5f);
-    Light l8 = Light(glm::vec3(180.0f, 50.0f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 50.0f);
-    Light l9 = Light(glm::vec3(25.0f, 5.0f, -105.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.011f, 0.011f, 1.0f), false, 14.6f);
-    Light l10 = Light(glm::vec3(25.0f, 5.0f, -70.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.011f, 0.011f), false, 14.6f);
+    Light l1 = Light(glm::vec3(25.0f, 100.0f, -25.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.65f, 0.011f), false, 5.0f);
+    Light l2 = Light(glm::vec3(0.0f, 145.0f, -800.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.9f, 0.7f), false, 5.0f);
+    Light l3 = Light(glm::vec3(-10.0f, 10.0f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.8f, 0.8f, 1.0f), false, 5.0f);
+    Light l4 = Light(glm::vec3(-240.0f, 10.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 5.0f);
+    Light l5 = Light(glm::vec3(-330.0f, 100.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 5.0f);
+    Light l6 = Light(glm::vec3(0.0f, 8.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.3f), false, 5.4f);
+    Light l7 = Light(glm::vec3(0.0f, 820.0f, 350.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 5.5f);
+    Light l8 = Light(glm::vec3(180.0f, 50.0f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 5.0f);
+    Light l9 = Light(glm::vec3(-10.0f, 3.0f, -30.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 20.6f);
+    Light l10 = Light(glm::vec3(25.0f, 5.0f, -70.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.011f, 0.011f), false, 5.6f);
     Light* lights[10] = { &l1, &l2, &l3, &l4, &l5,&l6,&l7,&l8,&l9,&l10 };
+    l9.setUpdateFunc(&l9Func);
     l7.setUpdateFunc(&dinamicLightUpdate);
     #pragma endregion
 
     #pragma region GameObjects
     // Material(ambientV = DEFAULT_AMBIENT,diffuseV = DEFAULT_DIFFUSE,colorV = DEFAULT_COLOR,roughnessAmt = DEFAULT_ROUGHNESS,amtOfSpecular = DEFAULT_SPECULAR_AMOUNT)
     //Material(const glm::vec4& colorV, const float& roughnessAmt, const float& amtOfSpecular)
-    Material veryShine(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f), 20.0f, 25.0f);
+    Material veryShine(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f), 20.0f);
 
-    Material veryShineBlue(glm::vec4(0.0999f, 0.09991f, 0.35f, 1.0f), 20, 250);
+    Material veryShineBlue(glm::vec4(0.0999f, 0.09991f, 0.35f, 1.0f), 20);
+    //Material(const glm::vec4& colorV, const float& roughnessAmt, const float& specularAmt, const glm::vec3& ambientV = DEFAULT_AMBIENT, const int& diffuseV = DEFAULT_DIFFUSE)
+    Material veryRoughGray(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 2);
+    Material Box(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 50);
 
-    Material veryRoughGray(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 750, 0.5);
 
-    Material veryRoughBlue(glm::vec4(0.0999f, 0.09991f, 0.4f, 1.0f), 750, 0.5);
+    Material veryRoughBlue(glm::vec4(0.0999f, 0.09991f, 0.4f, 1.0f), 750);
 
-    GameObject obj = GameObject(glm::vec3(0.0f, 0.0f, -40.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
+    GameObject obj = GameObject(glm::vec3(0.0f, 5.0f, -40.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
 
-    const char* pathss[] = { "TextureImages/scene.jpg" };
-    obj.setTextures(texture, sizeof(texture), pathss, 1);
-    obj.setScale(obj.getScale()* glm::fvec1(2));
+    const char* pathss = { "C:/Users/arthu/Downloads/container2.png" };
+    const char* paths = { "C:/Users/arthu/Downloads/container2_specular.png" };
+    Box.LoadDiffuseMap(pathss);
+    Box.LoadSpecular(paths);
+    obj.setScale(obj.getScale()* glm::fvec1(10));
+    obj.setMaterial(&Box);
 
     GameObject teapot = GameObject(glm::vec3(5.0f, 5.0f, -5.0f), glm::vec3(0.0f, 0.0f, 180.0f), teapotVertices, teapot_count, DEFAULT_SHADER_REFERENCE, false);
     teapot.setUpdateFunc(&objUpdate);
     teapot.setAftherUpdateFunc(&objAftherUpdate);
     teapot.setMaterial(&veryRoughBlue);
+    const char* brickWallw[] = { "C:/Users/arthu/Downloads/wall.jpeg" };
+    
 
     GameObject ground = GameObject(glm::vec3(0.0f, -1.5f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
     ground.setScale(glm::vec3(500.0f, 1.0f, 500.0f));
@@ -434,6 +464,9 @@ int main()
     GameObject wall = GameObject(glm::vec3(0.0f, 248.5f, -250.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
     wall.setScale(glm::vec3(500.0f, 500.0f, 1.0f));
     wall.setMaterial(&veryShine);
+    const char* brickWall[] = { "C:/Users/arthu/Downloads/wall.jpeg" };
+    
+
 
     GameObject wall2 = GameObject(glm::vec3(250.0f, 248.5f, 0.0f), glm::vec3(0.0f, 90.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
     wall2.setScale(glm::vec3(500.0f, 500.0f, 1.0f));
@@ -442,7 +475,7 @@ int main()
     GameObject bigBlock = GameObject(glm::vec3(100.0f, 100.5f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
     bigBlock.setScale(glm::vec3(50.0f, 50.0f, 50.0f));
     bigBlock.setMaterial(&veryShine);
-    bigBlock.setTextures(texture, sizeof(texture), pathss, 1);
+    
 
     GameObject bigBlock2 = GameObject(glm::vec3(-100.0f, 100.5f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
     bigBlock2.setScale(glm::vec3(50.0f, 50.0f, 50.0f));
@@ -459,8 +492,8 @@ int main()
         if (i == 0)
         {
            
-            const char* paths[] = { "TextureImages/glowstone.jpg" };
-            lights[i]->setTextures(texture, sizeof(texture), paths, 1);
+            
+            
             
         }
        
@@ -475,7 +508,7 @@ int main()
 
     while (!glfwWindowShouldClose(Window))
     {
-        processInput(Window);
+       
        
         glClearColor(0.1f, 0.1f, 0.3f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -507,7 +540,7 @@ int main()
 
 
         mainScene.render();
-       
+        processInput(Window);
 
 
         glfwSwapBuffers(Window);

@@ -7,7 +7,8 @@
 
 bool toggletWireFrameMode = false;
 bool wireFrame = false;
-
+bool scrolling = false;
+bool scrollingUp = false;
 void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)// Se nao estiver pressionado, glfwGetKey retorna GLFW_RELEASE//if it's not pressed, glfwGetKey returns GLFW_RELEASE
@@ -30,8 +31,23 @@ void processInput(GLFWwindow* window)
     {
 
     }
+    scrolling = false;
     /***************WireFrame*************************/
 }
+
+void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) 
+{
+    scrolling = true;
+    if (yoffset > 0) 
+    {
+        scrollingUp = true;
+    }
+    else if (yoffset < 0)  
+    {
+        scrollingUp = false;
+    }
+}
+
 bool isKeyPressed(GLFWwindow* window, const int& key)
 {
     if (glfwGetKey(window, key) == GLFW_PRESS)

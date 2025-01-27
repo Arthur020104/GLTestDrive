@@ -63,7 +63,7 @@ void Light::setModelMatixMode(const unsigned short& newModelMatrixMode)
 void Light::prepareRender()
 {
 	GameObject::mustHaveRenderAtribb("prepareRender");
-
+	glBindVertexArray(VAO);
 	Shader* shaderProgramL = this->getShaderPointer();
 	shaderProgramL->use();
 
@@ -71,14 +71,7 @@ void Light::prepareRender()
 
 	shaderProgramL->setMat4("model", this->getModelMatrix());
 
-	std::vector<unsigned int>* texturesIds = this->getTextureIds();
-
-	for (int i = 0; i < texturesIds->size(); i++)
-	{
-		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, texturesIds->at(i));
-	}
-	glBindVertexArray(this->getVAO());
+	//glBindVertexArray(VAO);
 }
 /*
 Light::~Light()
@@ -88,4 +81,16 @@ Light::~Light()
 glm::mat4 Light::getLightModelMat()
 {
 	return lightTransform.getModelMatrix();
+}
+glm::vec3 Light::getAmbient()
+{
+	return this->ambient;
+}
+glm::vec3 Light::getDiffuse()
+{
+	return this->diffuse;
+}
+glm::vec3 Light::getSpecular()
+{
+	return this->specular;
 }
