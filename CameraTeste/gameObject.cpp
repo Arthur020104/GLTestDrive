@@ -202,7 +202,7 @@ void GameObject::prepareRender()
     this->shaderProgram->setMat3("model3", glm::mat3(model));
 
     /*Material things*/
-    material->LoadMaterialDataToShader(shaderProgram);
+    material->LoadMaterialDataToShader(shaderProgram,this->getScale());
     /*Material things*/
 
     /*for (int i = 0; i < texturesIds.size(); i++)

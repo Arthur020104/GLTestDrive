@@ -57,6 +57,9 @@ float Speed = 8.0f;
 float DefaultSpeed = 18.0f;
 float VerticalSens = 100.0f;
 float HorizontalSens = 100.0f;
+float IncreaseIntensitySpeed = 30.0f;
+int aspectOfLightBeingChanged = 0;
+bool wait = false;
 
 // Janela e shaders
 GLFWwindow* Window;
@@ -236,6 +239,118 @@ void l9Func(GameObject* obj)
     {
         obj->setPos(obj->getPos() + glm::fvec1(-Speed * 10 * DeltaTime) * glm::vec3(0.0f, 1.0f, 0.0f));
     }
+    
+
+
+
+
+
+    if (isKeyPressed(Window, GLFW_KEY_9) && isKeyPressed(Window, GLFW_KEY_LEFT_SHIFT) && isKeyPressed(Window, GLFW_KEY_EQUAL))
+    {
+        if (wait)
+        {
+            return;
+        }
+        aspectOfLightBeingChanged++;
+        if (aspectOfLightBeingChanged > 3)
+            aspectOfLightBeingChanged = 0;
+        std::cout << aspectOfLightBeingChanged << "\n";
+        wait = true;
+
+    }
+    else if (isKeyPressed(Window, GLFW_KEY_9) && isKeyPressed(Window, GLFW_KEY_LEFT_SHIFT) && isKeyPressed(Window, GLFW_KEY_MINUS))
+    {
+        if (wait)
+        {
+            return;
+        }
+        aspectOfLightBeingChanged--;
+        if (aspectOfLightBeingChanged < 0)
+            aspectOfLightBeingChanged = 3;
+        std::cout << aspectOfLightBeingChanged << "\n";
+        wait = true;
+    }
+    else
+    {
+        wait = false;
+    }
+
+
+
+
+
+    if (isKeyPressed(Window, GLFW_KEY_9) && isKeyPressed(Window, GLFW_KEY_MINUS) && !isKeyPressed(Window, GLFW_KEY_LEFT_SHIFT))
+    {
+        Light* l = dynamic_cast<Light*>(obj);
+        if (l == nullptr)
+        {
+            std::cerr << "Could not cast to Light pointer, returning\n";
+            return;
+        }
+        switch (aspectOfLightBeingChanged)
+        {
+            case 0:
+                l->setIntensity(l->getIntensity() - DeltaTime * IncreaseIntensitySpeed);
+                l->setScale(l->getScale() + glm::vec3(-1) * DeltaTime * (IncreaseIntensitySpeed / 100));
+                break;
+            case 1:
+                l->setAmbient(l->getAmbient() + glm::vec3(-1) * DeltaTime * IncreaseIntensitySpeed);
+                break;
+            case 2:
+                l->setDiffuse(l->getDiffuse() + glm::vec3(-1) * DeltaTime * IncreaseIntensitySpeed);
+                break;
+            case 3:
+                l->setSpecular(l->getSpecular() + glm::vec3(-1) * DeltaTime * IncreaseIntensitySpeed);
+                break;
+        }
+    }       
+    else if (isKeyPressed(Window, GLFW_KEY_9) && isKeyPressed(Window, GLFW_KEY_EQUAL) && !isKeyPressed(Window, GLFW_KEY_LEFT_SHIFT))
+    {
+        Light* l = dynamic_cast<Light*>(obj);
+        if (l == nullptr)
+        {
+            std::cerr << "Could not cast to Light pointer, returning\n";
+            return;
+        }
+        switch (aspectOfLightBeingChanged)
+        {
+            case 0:
+                l->setIntensity(l->getIntensity() + DeltaTime * IncreaseIntensitySpeed);
+                l->setScale(l->getScale() + glm::vec3(1) * DeltaTime * (IncreaseIntensitySpeed / 100));
+                break;
+            case 1:
+                l->setAmbient(l->getAmbient() + glm::vec3(1) * DeltaTime * IncreaseIntensitySpeed);
+                break;
+            case 2:
+                l->setDiffuse(l->getDiffuse() + glm::vec3(1) * DeltaTime * IncreaseIntensitySpeed);
+                break;
+            case 3:
+                l->setSpecular(l->getSpecular() + glm::vec3(1) * DeltaTime * IncreaseIntensitySpeed);
+                break;
+        }
+    }
+    /*
+    if (isKeyPressed(Window, GLFW_KEY_9) && isKeyPressed(Window, GLFW_KEY_MINUS) && isKeyPressed(Window,GLFW_KEY_LEFT_SHIFT))
+    {
+        Light* l = dynamic_cast<Light*>(obj);
+        if (l == nullptr)
+        {
+            std::cerr << "Could not cast to Light pointer, returning\n";
+            return;
+        }
+        l->setAmbient(l->getAmbient() + glm::vec3(-1) * DeltaTime * IncreaseIntensitySpeed);
+    }
+    else if (isKeyPressed(Window, GLFW_KEY_9) && isKeyPressed(Window, GLFW_KEY_EQUAL) && isKeyPressed(Window, GLFW_KEY_LEFT_SHIFT))
+    {
+        Light* l = dynamic_cast<Light*>(obj);
+        if (l == nullptr)
+        {
+            std::cerr << "Could not cast to Light pointer, returning\n";
+            return;
+        }
+        l->setAmbient(l->getAmbient() + glm::vec3(1) * DeltaTime * IncreaseIntensitySpeed);
+    }*/
+
 }
 void cameraMovement()
 {
@@ -413,16 +528,16 @@ int main()
 
 
     #pragma region Lights
-    Light l1 = Light(glm::vec3(25.0f, 100.0f, -25.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.65f, 0.011f), false, 5.0f);
-    Light l2 = Light(glm::vec3(0.0f, 145.0f, -800.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.9f, 0.7f), false, 5000.0f);
-    Light l3 = Light(glm::vec3(-10.0f, 10.0f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.8f, 0.8f, 1.0f), false, 5.0f);
-    Light l4 = Light(glm::vec3(-240.0f, 10.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 5.0f);
-    Light l5 = Light(glm::vec3(-330.0f, 100.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 5.0f);
-    Light l6 = Light(glm::vec3(0.0f, 8.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.3f), false, 5.4f);
-    Light l7 = Light(glm::vec3(0.0f, 820.0f, 350.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 5.5f);
-    Light l8 = Light(glm::vec3(180.0f, 50.0f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 5.0f);
-    Light l9 = Light(glm::vec3(-10.0f, 3.0f, -30.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 20.6f);
-    Light l10 = Light(glm::vec3(25.0f, 5.0f, -70.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.011f, 0.011f), false, 5.6f);
+    Light l1 = Light(glm::vec3(25.0f, 100.0f, -25.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.65f, 0.011f), false, 1.0f);
+    Light l2 = Light(glm::vec3(0.0f, 145.0f, -800.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.9f, 0.7f), false, 1.0f);
+    Light l3 = Light(glm::vec3(-10.0f, 10.0f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.8f, 0.8f, 1.0f), false, 1.0f);
+    Light l4 = Light(glm::vec3(-240.0f, 10.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 1.0f);
+    Light l5 = Light(glm::vec3(-330.0f, 100.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 1.0f);
+    Light l6 = Light(glm::vec3(0.0f, 8.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.3f), false, 1.4f);
+    Light l7 = Light(glm::vec3(0.0f, 820.0f, 350.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 1.5f);
+    Light l8 = Light(glm::vec3(180.0f, 50.0f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 1.0f);
+    Light l9 = Light(glm::vec3(-10.0f, 3.0f, -30.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 1.6f);
+    Light l10 = Light(glm::vec3(25.0f, 5.0f, -70.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.011f, 0.011f), false, 1.6f);
     Light* lights[10] = { &l1, &l2, &l3, &l4, &l5,&l6,&l7,&l8,&l9,&l10 };
     l9.setUpdateFunc(&l9Func);
     l7.setUpdateFunc(&dinamicLightUpdate);
@@ -437,20 +552,45 @@ int main()
     //Material(const glm::vec4& colorV, const float& roughnessAmt, const float& specularAmt, const glm::vec3& ambientV = DEFAULT_AMBIENT, const int& diffuseV = DEFAULT_DIFFUSE)
     Material veryRoughGray(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 2);
     Material Box(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 50);
-
+    Material Box2(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 50);
+    Material GroundMat(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 1);
 
     Material veryRoughBlue(glm::vec4(0.0999f, 0.09991f, 0.4f, 1.0f), 750);
 
     GameObject obj = GameObject(glm::vec3(0.0f, 5.0f, -40.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
+    GameObject obj2 = GameObject(glm::vec3(-15.0f, 5.0f, -40.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
+    GameObject ground = GameObject(glm::vec3(0.0f, -5.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
 
     const char* pathss = { "C:/Users/arthu/Downloads/container2.png" };
     const char* paths = { "C:/Users/arthu/Downloads/container2_specular.png" };
+    const char* emissionMap = { "C:/Users/arthu/Downloads/matrix.jpg" };
+    const char* emissionMapGlowStone = { "C:/Users/arthu/source/repos/CameraTeste/CameraTeste/TextureImages/Glowstone.jpg" };
+    const char* groundTexture = { "C:/Users/arthu/Downloads/concrete-wall-scratched-material-background-texture-concept.jpg" };
+
     Box.LoadDiffuseMap(pathss);
     Box.LoadSpecularMap(paths);
+   // Box.LoadEmissionMap(emissionMap);
+    Box.setRepeatTextureFactor(glm::vec3(0.3f));
+   // Box.setRepeatTexture(false);
+
     obj.setScale(obj.getScale()* glm::fvec1(10));
     obj.setMaterial(&Box);
+    obj.setUpdateFunc(&objUpdate);
+    obj.setAftherUpdateFunc(&objAftherUpdate);
 
-    GameObject teapot = GameObject(glm::vec3(5.0f, 5.0f, -5.0f), glm::vec3(0.0f, 0.0f, 180.0f), teapotVertices, teapot_count, DEFAULT_SHADER_REFERENCE, false);
+    //Box2.LoadDiffuseMap(emissionMapGlowStone);
+    //Box2.LoadSpecularMap(paths);
+    Box2.LoadEmissionMap(emissionMapGlowStone);
+    obj2.setScale(obj2.getScale()* glm::fvec1(1));
+    obj2.setMaterial(&Box2);
+
+    ground.setMaterial(&GroundMat);
+    ground.setScale(glm::vec3(300.0f,0.3f,300.0f));
+    GroundMat.LoadDiffuseMap(groundTexture);
+    GroundMat.setSpecularMulti(0.1f);
+    GroundMat.setRepeatTextureFactor(glm::vec3(0.01f));
+
+     /*GameObject teapot = GameObject(glm::vec3(5.0f, 5.0f, -5.0f), glm::vec3(0.0f, 0.0f, 180.0f), teapotVertices, teapot_count, DEFAULT_SHADER_REFERENCE, false);
     teapot.setUpdateFunc(&objUpdate);
     teapot.setAftherUpdateFunc(&objAftherUpdate);
     teapot.setMaterial(&veryRoughBlue);
@@ -480,8 +620,11 @@ int main()
     GameObject bigBlock2 = GameObject(glm::vec3(-100.0f, 100.5f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
     bigBlock2.setScale(glm::vec3(50.0f, 50.0f, 50.0f));
     bigBlock2.setMaterial(&veryShineBlue);
+    */
 
-    GameObject* arr[17] = { &obj, &teapot, &ground, &wall, &bigBlock, &bigBlock2, &wall2};
+    const int SCENE_OBJS_AND_LIGHTS = 13;
+    const int OFFSET = 3;
+    GameObject* arr[SCENE_OBJS_AND_LIGHTS] = { &obj, &obj2, &ground};
 
     // Adicionando representação das luzes
     for (int i = 0; i < 10; i++) 
@@ -498,13 +641,13 @@ int main()
         }
        
         //lights[i]->setTextures()
-        arr[i + 7] = lights[i];
+        arr[i + OFFSET] = lights[i];
     }
 
     l2.setModelMatixMode(1);// set different type of model matrix to rotate around origin
     #pragma endregion
     float lightSpeed = -55.0f;
-    Scene mainScene(arr, 17, &cameraInst, PROJECTION);
+    Scene mainScene(arr, SCENE_OBJS_AND_LIGHTS, &cameraInst, PROJECTION);
 
     while (!glfwWindowShouldClose(Window))
     {

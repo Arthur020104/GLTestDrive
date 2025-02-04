@@ -18,27 +18,90 @@ void Material::LoadMaterialDataToShader(Shader* s)
     }
 
     s->setVec4("material.color", this->color);
-    s->setFloat("material.roughness", this->roughness);
+    s->setFloat("material.roughness", this->brightness);
     s->setFloat("material.diffuseMulti", this->diffuseMulti);
     s->setFloat("material.specularMulti", this->specularMulti);
+    s->setFloat("material.emissionMulti", this->emMulti);
 
     s->setBool("material.hasSpecularMap", this->hasSpecularMap);
     s->setBool("material.hasDiffuseMap", this->hasDiffuseMap);
+    s->setBool("material.hasEmissionMap", this->hasEmissionMap);
 
     s->setInt("material.specular", this->specular);
 
     s->setInt("material.diffuse", diffuse);
+    s->setInt("material.emission", emission);
+
+    s->setBool("material.repeatTexture", this->repeatTexture);
+
+
+    s->setVec3("material.repeatTextureFactor", this->repeatTextureFactor);
+
+
     glActiveTexture(GL_TEXTURE0 + diffuse);
     glBindTexture(GL_TEXTURE_2D, diffuseMap);
 
     glActiveTexture(GL_TEXTURE0 + specular);
     glBindTexture(GL_TEXTURE_2D, specularMap);
 
+    glActiveTexture(GL_TEXTURE0 + emission);
+    glBindTexture(GL_TEXTURE_2D, emissionMap);
+
+    s->setVec3("material.ambient", this->ambient);
+}
+
+void Material::LoadMaterialDataToShader(Shader* s, glm::vec3 scale)
+{
+    int currentProgram;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+    if (currentProgram != s->ID)
+    {
+        std::cerr << "Error: Shader program not active before loading material data.\n";
+        return;
+    }
+
+    s->setVec4("material.color", this->color);
+    s->setFloat("material.brightness", this->brightness);
+    s->setFloat("material.diffuseMulti", this->diffuseMulti);
+    s->setFloat("material.specularMulti", this->specularMulti);
+    s->setFloat("material.emissionMulti", this->emMulti);
+
+    s->setBool("material.hasSpecularMap", this->hasSpecularMap);
+    s->setBool("material.hasDiffuseMap", this->hasDiffuseMap);
+    s->setBool("material.hasEmissionMap", this->hasEmissionMap);
+
+    s->setInt("material.specular", this->specular);
+
+    s->setInt("material.diffuse", diffuse);
+    s->setInt("material.emission", emission);
+
+    s->setBool("material.repeatTexture", this->repeatTexture);
+
+ 
+    s->setVec3("material.repeatTextureFactor", this->repeatTextureFactor * scale);
+
+
+    glActiveTexture(GL_TEXTURE0 + diffuse);
+    glBindTexture(GL_TEXTURE_2D, diffuseMap);
+
+    glActiveTexture(GL_TEXTURE0 + specular);
+    glBindTexture(GL_TEXTURE_2D, specularMap);
+
+    glActiveTexture(GL_TEXTURE0 + emission);
+    glBindTexture(GL_TEXTURE_2D, emissionMap);
+
     s->setVec3("material.ambient", this->ambient);
 }
 void Material::UnbindMaterial()
 {
     glActiveTexture(GL_TEXTURE0 + diffuse);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+
+    glActiveTexture(GL_TEXTURE0 + specular);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glActiveTexture(GL_TEXTURE0 + emission);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 unsigned int Material::generateTexture(const char* path)
@@ -57,20 +120,18 @@ unsigned int Material::generateTexture(const char* path)
         return 0;
     }
 
-    std::cout << "Successfully loaded texture: " << path << std::endl;
+    std::cout << "Successfully loaded texture: " << path
+        << " (" << width << "x" << height << ", "
+        << nrChannels << " channels)" << std::endl;
 
     glBindTexture(GL_TEXTURE_2D, texture);
 
     GLenum format;
-    if (nrChannels == 1)
-        format = GL_RED;
-    else if (nrChannels == 2)
-        format = GL_RG;
-    else if (nrChannels == 3)
-        format = GL_RGB;
-    else if (nrChannels == 4)
-        format = GL_RGBA;
-    else
+    if (nrChannels == 1) format = GL_RED;
+    else if (nrChannels == 2) format = GL_RG;
+    else if (nrChannels == 3) format = GL_RGB;
+    else if (nrChannels == 4) format = GL_RGBA;
+    else 
     {
         std::cerr << "Unsupported texture format: " << nrChannels << " channels.\n";
         stbi_image_free(data);
@@ -81,8 +142,8 @@ unsigned int Material::generateTexture(const char* path)
     glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -117,5 +178,18 @@ void Material::LoadSpecularMap(const char* path)
     {
         this->specularMap = textureS;
         hasSpecularMap = true;
+    }
+}
+void Material::LoadEmissionMap(const char* path)
+{
+    unsigned int texture = generateTexture(path);
+    if (texture == 0)
+    {
+        std::cerr << "Error: Failed to load emission map from path: " << path << std::endl;
+    }
+    else
+    {
+        this->emissionMap = texture;
+        hasEmissionMap = true;
     }
 }

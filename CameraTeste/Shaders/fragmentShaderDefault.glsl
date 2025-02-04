@@ -23,13 +23,19 @@ struct Material
     vec3 ambient;
     sampler2D diffuse;
     sampler2D specular;
-    float roughness;
+    sampler2D emission;
+    float brightness;
     vec4 color;
     float diffuseMulti;
     float specularMulti;
+    float emissionMulti;
 
     bool hasSpecularMap;
     bool hasDiffuseMap;
+    bool hasEmissionMap;
+
+    bool repeatTexture;
+    vec3 repeatTextureFactor;
 }; 
 
 uniform Material material; // Material properties uniform
@@ -37,6 +43,7 @@ uniform Material material; // Material properties uniform
 // Input variables
 in vec4 myVertex; // Position of the current fragment in world space
 in vec2 TextureCoord; // Texture coordinates for the fragment
+vec2 aTextureCoord;
 in vec3 NormalVectors; // Normal vectors for the fragment
 
 // Computed view direction vector (camera direction)
@@ -46,69 +53,78 @@ uniform vec3 cameraPos;
 out vec4 FragColor;
 
 // Precomputed variables
-vec3 totalSpecularAndDiffuse = vec3(0.0); // Accumulation of specular and diffuse lighting
+vec3 totalDiffuse = vec3(0.0); // Accumulation of specular and diffuse lighting
+vec3 totalSpecular = vec3(0.0);
 vec3 totalAmbientLight;
 
-void CalculateLight()
+void CalculateLight() 
 {
-    vec3 transformedNormal = normalize(model3 * NormalVectors); // Transform normals
-    vec3 fragmentPosition = myVertex.xyz; // Fragment position in world space
-    vec3 viewDirection = normalize(cameraPos - fragmentPosition); // View direction relative to camera
-
-    int indexClosest = 0;
-    float minDistance = 0;
+    vec3 normal = normalize(model3 * NormalVectors);
+    vec3 fragPos = myVertex.xyz;
+    vec3 viewDir = normalize(cameraPos - fragPos);
 
     for (int i = 0; i < numberOfLights; i++) 
     {
-        vec3 lightToFragmentVector = lights[i].positionWorld - fragmentPosition;
-        vec3 lightDirection = normalize(lightToFragmentVector);
+        vec3 lightVec = lights[i].positionWorld - fragPos;
+        vec3 lightDir = normalize(lightVec);
 
-        float distanceToLight = length(lightToFragmentVector);
-        float attenuation = 1.0 / (1.0 + 0.1 * distanceToLight + 0.01 * distanceToLight * distanceToLight);
+        float lightDist = length(lightVec);
+        float attenuation = 1.0 / (1.0 + 0.1 * lightDist + 0.01 * lightDist * lightDist);
 
-        float diffuseFactor = max(dot(transformedNormal, lightDirection), 0.0);
+        float diffuseStrength = max(dot(normal, lightDir), 0.0);
 
-        vec3 materialScaledDiffuse = vec3(texture(material.diffuse, TextureCoord)) * material.diffuseMulti * diffuseFactor;
+        vec3 diffuseColor = vec3(texture(material.diffuse, aTextureCoord)) * material.diffuseMulti * diffuseStrength;
         if (!material.hasDiffuseMap) 
-        {
-            materialScaledDiffuse = vec3(material.diffuseMulti) * diffuseFactor;
-        }
+            diffuseColor = vec3(material.diffuseMulti) * diffuseStrength;
 
+        vec3 halfwayDir = normalize(lightDir + viewDir);
 
-        vec3 halfVector = normalize(lightDirection + viewDirection); // Halfway vector
-
-        vec3 specularFactor = vec3(texture(material.specular, TextureCoord)) * pow(max(dot(transformedNormal, halfVector), 0.0), material.roughness) * material.specularMulti;
+        vec3 specularColor = vec3(texture(material.specular, aTextureCoord)) * pow(max(dot(normal, halfwayDir), 0.0), material.brightness) * material.specularMulti;
         if (!material.hasSpecularMap) 
-        {
-            specularFactor = vec3(material.specularMulti) * pow(max(dot(transformedNormal, halfVector), 0.0), material.roughness) ;
-        }
+            specularColor = vec3(material.specularMulti) * pow(max(dot(normal, halfwayDir), 0.0), material.brightness);
 
-        totalSpecularAndDiffuse += attenuation * lights[i].intensity * 
-                                   (materialScaledDiffuse * lights[i].diffuse +
-                                    lights[i].specular * specularFactor);
-
-        if (minDistance > distanceToLight || i == 0) 
-        { 
-            minDistance = distanceToLight;
-            indexClosest = i;
-        }
+        totalDiffuse += attenuation * lights[i].intensity * diffuseColor * lights[i].diffuse;
+        totalSpecular += attenuation * lights[i].intensity * lights[i].specular * specularColor;
     }
-    
 
-    totalAmbientLight = vec3(texture(material.diffuse, TextureCoord)) * lights[indexClosest].ambient * material.ambient;
-
-    if(!material.hasDiffuseMap)
-    {
-        totalAmbientLight = material.ambient * lights[indexClosest].ambient ;
-    }
+    totalAmbientLight = vec3(texture(material.diffuse, aTextureCoord)) * material.ambient;
+    if (!material.hasDiffuseMap)
+        totalAmbientLight = vec3(material.color) * material.ambient;
 }
 
+float xyzAvg(vec3 vec)
+{
+    return (vec.x+vec.y+vec.z)/3.0;
+
+}
 
 void main() 
 {
+    aTextureCoord = material.repeatTexture 
+        ? TextureCoord * vec2(material.repeatTextureFactor.x, material.repeatTextureFactor.z) 
+        : TextureCoord;
+
     CalculateLight();
 
-    vec4 baseColor = material.color;
+    vec4 emissionT = texture(material.emission, aTextureCoord);
+    vec4 baseColor = material.hasDiffuseMap 
+        ? texture(material.diffuse, aTextureCoord) 
+        : material.color;
 
-    FragColor = baseColor * (vec4(totalSpecularAndDiffuse, 1.0) + vec4(totalAmbientLight, 1.0));
+    if (length(totalDiffuse) + length(totalSpecular) >= length(totalAmbientLight)) 
+    {
+        FragColor = baseColor * (xyzAvg(totalDiffuse) < 0.9 
+            ? vec4(totalDiffuse, 1.0) + vec4(totalSpecular, 1.0) 
+            : normalize(vec4(totalDiffuse, 1.0)) * 0.9 * 3) + vec4(totalSpecular, 1.0);
+
+        if (material.hasEmissionMap && emissionT.w > 0.1 && xyzAvg(vec3(emissionT)) > 0.1)
+            FragColor = material.emissionMulti * emissionT;
+    } 
+    else 
+    {
+        FragColor = baseColor * vec4(totalAmbientLight, 1.0);
+
+        if (material.hasEmissionMap)
+            FragColor += material.emissionMulti * emissionT;
+    }
 }

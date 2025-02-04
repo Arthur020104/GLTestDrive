@@ -94,3 +94,23 @@ glm::vec3 Light::getSpecular()
 {
 	return this->specular;
 }
+void Light::setIntensity(float value)
+{
+	intensity = value;
+	lightsThatWereUpdated->insert(this);
+}
+void Light::setAmbient(glm::vec3 amb)
+{
+	this->ambient = amb;
+	lightsThatWereUpdated->insert(this);
+}
+void Light::setDiffuse(glm::vec3 diff)
+{
+	this->diffuse = diff;
+	lightsThatWereUpdated->insert(this);
+}
+void Light::setSpecular(glm::vec3 spec)
+{
+	this->specular = spec;
+	lightsThatWereUpdated->insert(this);
+}

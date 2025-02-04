@@ -61,6 +61,15 @@ public:
 
     TransformController lightTransform;
 
+    void setIntensity(float value);
+    float getIntensity() const { return intensity; }
+
+    void setAmbient(glm::vec3 amb);
+    void setDiffuse(glm::vec3 diff);
+    void setSpecular(glm::vec3 spec);
+
+
+
 private:
     // Atributos privados
     glm::vec3 color;
