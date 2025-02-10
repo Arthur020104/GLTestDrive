@@ -4,8 +4,14 @@
 struct Light 
 {
     vec3 positionWorld;
+    vec3 direction;
+    float cutOff;
+
+    bool isDirectional;
     vec3 colorValue;
+
     float intensity;
+
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
@@ -66,10 +72,22 @@ void CalculateLight()
     for (int i = 0; i < numberOfLights; i++) 
     {
         vec3 lightVec = lights[i].positionWorld - fragPos;
-        vec3 lightDir = normalize(lightVec);
+        vec3 lightDir = lights[i].isDirectional
+        ? normalize(lights[i].positionWorld)
+        : normalize(lightVec);
+
+        float theta = dot(lightDir, normalize(-lights[i].direction));
+    
+        if(theta <= lights[i].cutOff && !lights[i].isDirectional && lights[i].cutOff!= -1.0) 
+        {       
+           continue;
+        }
+        
 
         float lightDist = length(lightVec);
-        float attenuation = 1.0 / (1.0 + 0.1 * lightDist + 0.01 * lightDist * lightDist);
+        float attenuation =  lights[i].isDirectional
+        ? 1.0 
+        : 1.0 / (1.0 + 0.1 * lightDist + 0.01 * lightDist * lightDist);
 
         float diffuseStrength = max(dot(normal, lightDir), 0.0);
 
@@ -119,6 +137,8 @@ void main()
 
         if (material.hasEmissionMap && emissionT.w > 0.1 && xyzAvg(vec3(emissionT)) > 0.1)
             FragColor = material.emissionMulti * emissionT;
+
+   
     } 
     else 
     {

@@ -81,19 +81,19 @@ void TransformController::setScale(const glm::vec3& newScale)
     updateModelMatrix();
 }
 
-glm::vec3 TransformController::forward()
+glm::vec3 TransformController::getForward()
 {
-    return glm::vec3(
+    return glm::normalize(glm::vec3(
         glm::cos(objRot.x) * glm::sin(objRot.y),
         glm::sin(objRot.x),
         glm::cos(objRot.x) * glm::cos(objRot.y)
-    );
+    ));
 }
-glm::vec3 TransformController::right()
+glm::vec3 TransformController::getRight()
 {
-    return glm::vec3(
+    return glm::normalize(glm::vec3(
         glm::cos(objRot.y),
         0.0f,
         glm::sin(objRot.y)
-    );
+    ));
 }

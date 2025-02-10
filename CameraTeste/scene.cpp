@@ -58,23 +58,11 @@ Scene::Scene(GameObject** objArr, const int& sizeObjArr, Camera* camera, const g
 void Scene::updateLightsCache()
 {
     size_t sizeOfLightsVec = sceneLights.size();
-    lightsPosWorldCache.resize(sizeOfLightsVec);
-    lightsColorsCache.resize(sizeOfLightsVec);
-    lightsIntensityCache.resize(sizeOfLightsVec);
-
-    lightsAmbientCache.resize(sizeOfLightsVec);
-    lightsDiffuseCache.resize(sizeOfLightsVec);
-    lightsSpecularCache.resize(sizeOfLightsVec);
+    lightsCache.resize(sizeOfLightsVec);
 
     for (int i = 0; i < sizeOfLightsVec; i++) 
     {
-        lightsPosWorldCache[i] = sceneLights[i]->getPos() * glm::mat3(sceneLights[i]->getLightModelMat());
-        lightsColorsCache[i] = sceneLights[i]->getColor();
-        lightsIntensityCache[i] = sceneLights[i]->getIntensity();
-
-        lightsAmbientCache[i] = sceneLights[i]->getAmbient();
-        lightsDiffuseCache[i] = sceneLights[i]->getDiffuse();
-        lightsSpecularCache[i] = sceneLights[i]->getSpecular();
+        updateElementCache(sceneLights[i]);
     }
   
 }
@@ -82,12 +70,17 @@ void Scene :: updateElementCache(Light* element)
 {
     auto it = std::find(sceneLights.begin(), sceneLights.end(), element);
     size_t index = std::distance(sceneLights.begin(), it);
-    lightsPosWorldCache[index] = element->getPos() * glm::mat3(element->getLightModelMat());
-    lightsColorsCache[index] = element->getColor();
-    lightsIntensityCache[index] = element->getIntensity();
-    lightsAmbientCache[index] = element->getAmbient();
-    lightsDiffuseCache[index] = element->getDiffuse();
-    lightsSpecularCache[index] = element->getSpecular();
+
+    lightsCache[index].posWorldCache = element->getPos() * glm::mat3(element->getLightModelMat());
+    lightsCache[index].colorsCache = element->getColor();
+    lightsCache[index].intensityCache = element->getIntensity();
+    lightsCache[index].ambientCache = element->getAmbient();
+    lightsCache[index].diffuseCache = element->getDiffuse();
+    lightsCache[index].specularCache = element->getSpecular();
+    lightsCache[index].directionalCache = element->getIsDirectional();
+
+    lightsCache[index].directionCache = element->getDirection();
+    lightsCache[index].cutOffCache = element->getCutOff();
 }
 void Scene::updateLightsChangedCache()
 {
@@ -122,7 +115,8 @@ void Scene::render()
 
         glm::mat4 viewMatrix = mainCamera->getViewMatrix();
         glm::vec3 cameraPos = mainCamera->getPos();
-        if (i == 0 || sceneObjs[i - 1]->getShaderPointer() != sceneObjs[i]->getShaderPointer()) 
+        this->updateLightsChangedCache();
+        if (i == 0 || sceneObjs[i - 1]->getShaderPointer() != sceneObjs[i]->getShaderPointer()) //instead of checking if the last object had the same shader, check if lights were set to any of the shaders this loop
         {
             Shader* shaderProgram = sceneObjs[i]->getShaderPointer();
             shaderProgram->use();
@@ -131,14 +125,18 @@ void Scene::render()
             for (int i = 0; i < sceneLights.size(); ++i) 
             {
                 std::string baseName = "lights[" + std::to_string(i) + "]";
-                shaderProgram->setVec3(baseName + ".positionWorld", lightsPosWorldCache[i]);
-                shaderProgram->setVec3(baseName + ".colorValue", lightsColorsCache[i]);
-                shaderProgram->setFloat(baseName + ".intensity", lightsIntensityCache[i]);
+                shaderProgram->setVec3(baseName + ".positionWorld", lightsCache[i].posWorldCache);
+                shaderProgram->setVec3(baseName + ".colorValue", lightsCache[i].colorsCache);
+                shaderProgram->setFloat(baseName + ".intensity", lightsCache[i].intensityCache);
 
+                shaderProgram->setVec3(baseName + ".ambient", lightsCache[i].ambientCache);
+                shaderProgram->setVec3(baseName + ".diffuse", lightsCache[i].diffuseCache);
+                shaderProgram->setVec3(baseName + ".specular", lightsCache[i].specularCache);
 
-                shaderProgram->setVec3(baseName + ".ambient", lightsAmbientCache[i]);
-                shaderProgram->setVec3(baseName + ".diffuse", lightsDiffuseCache[i]);
-                shaderProgram->setVec3(baseName + ".specular", lightsSpecularCache[i]);
+                shaderProgram->setBool(baseName + ".isDirectional", lightsCache[i].directionalCache);
+
+                shaderProgram->setFloat (baseName + ".cutOff", lightsCache[i].cutOffCache);
+                shaderProgram->setVec3(baseName + ".direction", lightsCache[i].directionCache);
             }
             shaderProgram->setVec3("cameraPos", cameraPos);
             shaderProgram->setMat4("projection", projectionMat);

@@ -42,7 +42,7 @@ const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 720;
 const double NEAR_FRUSTUM = 0.1f;
 const double FAR_FRUSTUM = 1000000000;
-const int AMOUNT_OF_SAMPLES_TO_COUNT_FPS = 2000;
+const int AMOUNT_OF_SAMPLES_TO_COUNT_FPS = 20000;
 const glm::mat4 PROJECTION = glm::perspective(glm::radians(55.0f), (float)WIDTH / HEIGHT, (float)NEAR_FRUSTUM, (float)FAR_FRUSTUM);
 
 // Variáveis de tempo
@@ -104,6 +104,25 @@ void dinamicLightUpdate(GameObject* obj)
     }
 
     l->setColor(addToColor);
+
+}
+
+void followCamera(GameObject* obj)
+{
+    obj->setPos(cameraInst.getPos() - cameraInst.foward());
+    Light* l = dynamic_cast<Light*>(obj);
+    l->setDirection(cameraInst.foward());
+    glm::vec3 up = glm::cross(cameraInst.foward(), cameraInst.right());
+
+    
+    double yaw = glm::atan(cameraInst.foward().x, cameraInst.foward().z);
+
+    double pitch = glm::asin(cameraInst.foward().y);
+
+    double roll = glm::atan(up.y, up.z);
+
+    
+    //obj->setRot(glm::vec3(pitch, yaw, roll));
 
 }
 
@@ -528,19 +547,21 @@ int main()
 
 
     #pragma region Lights
-    Light l1 = Light(glm::vec3(25.0f, 100.0f, -25.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.65f, 0.011f), false, 1.0f);
-    Light l2 = Light(glm::vec3(0.0f, 145.0f, -800.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.9f, 0.7f), false, 1.0f);
-    Light l3 = Light(glm::vec3(-10.0f, 10.0f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.8f, 0.8f, 1.0f), false, 1.0f);
-    Light l4 = Light(glm::vec3(-240.0f, 10.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 1.0f);
-    Light l5 = Light(glm::vec3(-330.0f, 100.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 1.0f);
-    Light l6 = Light(glm::vec3(0.0f, 8.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.3f), false, 1.4f);
-    Light l7 = Light(glm::vec3(0.0f, 820.0f, 350.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 1.5f);
-    Light l8 = Light(glm::vec3(180.0f, 50.0f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 1.0f);
-    Light l9 = Light(glm::vec3(-10.0f, 3.0f, -30.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 1.6f);
-    Light l10 = Light(glm::vec3(25.0f, 5.0f, -70.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.011f, 0.011f), false, 1.6f);
+    Light l1 = Light(glm::vec3(25.0f, 100.0f, -25.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.65f, 0.011f), false, 0.2f);
+    Light l2 = Light(glm::vec3(0.0f, 145.0f, -800.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.9f, 0.7f), false, 0.2f);
+    Light l3 = Light(glm::vec3(-10.0f, 10.0f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.8f, 0.8f, 1.0f), false, 0.2f);
+    Light l4 = Light(glm::vec3(-240.0f, 10.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 0.2f);
+    Light l5 = Light(glm::vec3(-330.0f, 100.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 0.2f);
+    Light l6 = Light(glm::vec3(0.0f, 8.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.3f), false, 0.4f);
+    Light l7 = Light(glm::vec3(0.0f, 820.0f, 350.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.6f, 0.5f, 0.5f), false, 3.0f, 12.5f, true);
+    Light l8 = Light(glm::vec3(180.0f, 50.0f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 0.2f);
+    Light l9 = Light(glm::vec3(10.0f, 3.0f, -35.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 3.0f, 12.5f);
+    Light l10 = Light(glm::vec3(10000.0f, 10000.0f, 10000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), true, 1.5f);//fix object going full white
     Light* lights[10] = { &l1, &l2, &l3, &l4, &l5,&l6,&l7,&l8,&l9,&l10 };
     l9.setUpdateFunc(&l9Func);
-    l7.setUpdateFunc(&dinamicLightUpdate);
+    l7.setScale(glm::vec3(1.0f));
+    l7.setUpdateFunc(&followCamera);
+    
     #pragma endregion
 
     #pragma region GameObjects
@@ -551,13 +572,13 @@ int main()
     Material veryShineBlue(glm::vec4(0.0999f, 0.09991f, 0.35f, 1.0f), 20);
     //Material(const glm::vec4& colorV, const float& roughnessAmt, const float& specularAmt, const glm::vec3& ambientV = DEFAULT_AMBIENT, const int& diffuseV = DEFAULT_DIFFUSE)
     Material veryRoughGray(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 2);
-    Material Box(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 50);
+    Material BoxMat(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 50);
     Material Box2(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 50);
     Material GroundMat(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 1);
 
     Material veryRoughBlue(glm::vec4(0.0999f, 0.09991f, 0.4f, 1.0f), 750);
 
-    GameObject obj = GameObject(glm::vec3(0.0f, 5.0f, -40.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
+   
     GameObject obj2 = GameObject(glm::vec3(-15.0f, 5.0f, -40.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
     GameObject ground = GameObject(glm::vec3(0.0f, -5.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
 
@@ -565,89 +586,71 @@ int main()
     const char* paths = { "C:/Users/arthu/Downloads/container2_specular.png" };
     const char* emissionMap = { "C:/Users/arthu/Downloads/matrix.jpg" };
     const char* emissionMapGlowStone = { "C:/Users/arthu/source/repos/CameraTeste/CameraTeste/TextureImages/Glowstone.jpg" };
-    const char* groundTexture = { "C:/Users/arthu/Downloads/concrete-wall-scratched-material-background-texture-concept.jpg" };
+    const char* groundTexture = { "C:/Users/arthu/Downloads/aerial_rocks_02_2k.blend/textures/aerial_rocks_02_diff_2k.jpg" };
 
-    Box.LoadDiffuseMap(pathss);
-    Box.LoadSpecularMap(paths);
+    BoxMat.LoadDiffuseMap(pathss);
+    BoxMat.LoadSpecularMap(paths);
    // Box.LoadEmissionMap(emissionMap);
-    Box.setRepeatTextureFactor(glm::vec3(0.3f));
+    //Box.setRepeatTextureFactor(glm::vec3(0.3f));
    // Box.setRepeatTexture(false);
+    constexpr float DEG2RAD = glm::pi<float>() / 180.0f;
 
-    obj.setScale(obj.getScale()* glm::fvec1(10));
-    obj.setMaterial(&Box);
-    obj.setUpdateFunc(&objUpdate);
-    obj.setAftherUpdateFunc(&objAftherUpdate);
-
-    //Box2.LoadDiffuseMap(emissionMapGlowStone);
-    //Box2.LoadSpecularMap(paths);
-    Box2.LoadEmissionMap(emissionMapGlowStone);
-    obj2.setScale(obj2.getScale()* glm::fvec1(1));
-    obj2.setMaterial(&Box2);
-
-    ground.setMaterial(&GroundMat);
-    ground.setScale(glm::vec3(300.0f,0.3f,300.0f));
-    GroundMat.LoadDiffuseMap(groundTexture);
-    GroundMat.setSpecularMulti(0.1f);
-    GroundMat.setRepeatTextureFactor(glm::vec3(0.01f));
-
-     /*GameObject teapot = GameObject(glm::vec3(5.0f, 5.0f, -5.0f), glm::vec3(0.0f, 0.0f, 180.0f), teapotVertices, teapot_count, DEFAULT_SHADER_REFERENCE, false);
-    teapot.setUpdateFunc(&objUpdate);
-    teapot.setAftherUpdateFunc(&objAftherUpdate);
-    teapot.setMaterial(&veryRoughBlue);
-    const char* brickWallw[] = { "C:/Users/arthu/Downloads/wall.jpeg" };
-    
-
-    GameObject ground = GameObject(glm::vec3(0.0f, -1.5f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
-    ground.setScale(glm::vec3(500.0f, 1.0f, 500.0f));
-    ground.setMaterial(&veryRoughGray);
-
-    GameObject wall = GameObject(glm::vec3(0.0f, 248.5f, -250.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
-    wall.setScale(glm::vec3(500.0f, 500.0f, 1.0f));
-    wall.setMaterial(&veryShine);
-    const char* brickWall[] = { "C:/Users/arthu/Downloads/wall.jpeg" };
-    
-
-
-    GameObject wall2 = GameObject(glm::vec3(250.0f, 248.5f, 0.0f), glm::vec3(0.0f, 90.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
-    wall2.setScale(glm::vec3(500.0f, 500.0f, 1.0f));
-    wall2.setMaterial(&veryRoughGray);
-
-    GameObject bigBlock = GameObject(glm::vec3(100.0f, 100.5f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
-    bigBlock.setScale(glm::vec3(50.0f, 50.0f, 50.0f));
-    bigBlock.setMaterial(&veryShine);
-    
-
-    GameObject bigBlock2 = GameObject(glm::vec3(-100.0f, 100.5f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
-    bigBlock2.setScale(glm::vec3(50.0f, 50.0f, 50.0f));
-    bigBlock2.setMaterial(&veryShineBlue);
-    */
-
-    const int SCENE_OBJS_AND_LIGHTS = 13;
+    float angleIncrement = 60.0f;
     const int OFFSET = 3;
-    GameObject* arr[SCENE_OBJS_AND_LIGHTS] = { &obj, &obj2, &ground};
 
-    // Adicionando representação das luzes
-    for (int i = 0; i < 10; i++) 
+    // Vector for all scene objects
+    std::vector<GameObject*> arr;
+    arr.reserve(OFFSET + 10 + 6);  // Reserve space for efficiency
+
+    // Create and configure the box objects
+    for (int i = 0; i < 6; ++i) 
     {
-        //lights[i]->getPos() 
-        lights[i]->enablePhysicalRepresentation(vertices, numVertices, &LightShader);
-        lights[i]->setScale(lights[i]->getScale()* glm::fvec1(lights[i]->getIntensity()/20));
-        if (i == 0)
-        {
-           
-            
-            
-            
-        }
-       
-        //lights[i]->setTextures()
-        arr[i + OFFSET] = lights[i];
+        // Calculate position offset in a circular layout
+        float angle = i * angleIncrement * DEG2RAD;
+        glm::vec3 offset = glm::vec3(5.0f * glm::cos(angle), 2.0f, -40.0f + 5.0f * glm::sin(angle));
+
+        // Set up individual GameObjects
+        GameObject* boxObj = new GameObject(offset, glm::vec3(0.0f, angle * 30.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
+
+        boxObj->setScale(boxObj->getScale() * glm::fvec1(1));
+        boxObj->setMaterial(&BoxMat);
+        boxObj->setUpdateFunc(&objUpdate);
+        boxObj->setAftherUpdateFunc(&objAftherUpdate);
+
+        // Add the box to the scene list
+        arr.push_back(boxObj);
     }
 
-    l2.setModelMatixMode(1);// set different type of model matrix to rotate around origin
-    #pragma endregion
+    // Setup additional objects (ground and obj2)
+    obj2.setScale(obj2.getScale() * glm::fvec1(1));
+    obj2.setMaterial(&Box2);
+    ground.setMaterial(&GroundMat);
+    ground.setScale(glm::vec3(300.0f, 0.3f, 300.0f));
+    GroundMat.LoadDiffuseMap(groundTexture);
+    GroundMat.setSpecularMulti(0.1f);
+    GroundMat.setRepeatTextureFactor(glm::vec3(0.05f));
+
+    // Add static objects to the scene list
+    arr.push_back(&obj2);
+    arr.push_back(&ground);
+
+    // Add lights to the scene list
+    for (int i = 0; i < 10; i++) {
+        lights[i]->enablePhysicalRepresentation(vertices, numVertices, &LightShader);
+        //lights[i]->setScale(lights[i]->getScale() * glm::fvec1(lights[i]->getIntensity() / 20));
+        if(lights[i]->getIsDirectional())
+            lights[i]->setScale(lights[i]->getScale() * glm::fvec1(1000));
+        // Add lights to the scene list
+        arr.push_back(lights[i]);
+    }
+
+    // Set the model matrix mode for l2
+    l2.setModelMatixMode(1); // Rotate around origin
+
+    // Scene setup
     float lightSpeed = -55.0f;
-    Scene mainScene(arr, SCENE_OBJS_AND_LIGHTS, &cameraInst, PROJECTION);
+    Scene mainScene(arr.data(), arr.size(), &cameraInst, PROJECTION);
+
 
     while (!glfwWindowShouldClose(Window))
     {
@@ -690,7 +693,10 @@ int main()
         glfwPollEvents();
 
     }
-    
+    for (int i = 0; i < 6; i++)
+    {
+        delete arr[i];
+    }
 
     glfwTerminate();
    /* for (int i = 3; i < 13; i++)

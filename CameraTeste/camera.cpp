@@ -23,11 +23,11 @@ Camera::Camera(glm::vec3 inicialPos, glm::vec3 target, bool isFpsCam)
 }
 glm::vec3 Camera::foward()
 { 
-	return forwardVec;
+	return glm::normalize(forwardVec);
 }
 glm::vec3 Camera::right()
 {
-	return  rightVec;
+	return  glm::normalize(rightVec);
 }
 glm::mat4 Camera::getViewMatrix()
 {
@@ -53,51 +53,60 @@ void Camera::setPos(const glm::vec3& newPos)
 	rightVec = glm::normalize(glm::cross(foward(), glm::vec3(0, 1, 0)));
 }
 
-void Camera::horizontalRotation(const double& degrees) 
+void Camera::horizontalRotation(const double& degrees)
 {
-	glm::vec4 aux = glm::vec4(targetPos, 1.0f);
+	glm::vec3 direction = targetPos - cameraPos;
 
-	glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(static_cast<float>(degrees)), glm::vec3(0, 1.0f, 0));
+	glm::mat4 rotationMatrix = glm::rotate(
+		glm::mat4(1.0f),
+		glm::radians(static_cast<float>(degrees)),
+		glm::vec3(0, 1.0f, 0)
+	);
 
-	aux = rotationMatrix * aux;
+	glm::vec4 rotatedDir = rotationMatrix * glm::vec4(direction, 0.0f);
 
-	targetPos.x = aux.x;
-	targetPos.y = aux.y;
-	targetPos.z = aux.z;
+	targetPos = cameraPos + glm::vec3(rotatedDir);
 
 	forwardVec = glm::normalize(targetPos - cameraPos);
-	rightVec = glm::normalize(glm::cross(foward(), glm::vec3(0, 1, 0)));
+	rightVec = glm::normalize(glm::cross(forwardVec, glm::vec3(0, 1, 0)));
 }
+
 void Camera::verticalRotation(const double& degrees)
 {
-	
-	glm::vec4 aux = glm::vec4(targetPos, 1.0f);
+	glm::vec3 direction = targetPos - cameraPos;
 
-	glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(static_cast<float>(degrees)), glm::vec3(forwardVec.z * -1, 0, forwardVec.x));
+	glm::mat4 rotationMatrix = glm::rotate(
+		glm::mat4(1.0f),
+		glm::radians(static_cast<float>(degrees)),
+		rightVec
+	);
 
-	aux = rotationMatrix * aux;
-	
-	if ((glm::normalize(cameraPos - glm::vec3(aux.x, aux.y, aux.z)).y >= 0.99 && aux.y <= targetPos.y) || (glm::normalize(cameraPos - glm::vec3(aux.x, aux.y, aux.z)).y <= -0.99 && aux.y >= targetPos.y))
-	{
+	glm::vec4 rotatedDir = rotationMatrix * glm::vec4(direction, 0.0f);
+	glm::vec3 newDirection = glm::normalize(glm::vec3(rotatedDir));
+
+	if (fabs(newDirection.y) > 0.99f)
 		return;
-	}
 
-	targetPos.x = aux.x;
-	targetPos.y = aux.y;
-	targetPos.z = aux.z;
+	targetPos = cameraPos + glm::vec3(rotatedDir);
 
 	forwardVec = glm::normalize(targetPos - cameraPos);
-	rightVec = glm::normalize(glm::cross(foward(), glm::vec3(0, 1, 0)));
+	rightVec = glm::normalize(glm::cross(forwardVec, glm::vec3(0, 1, 0)));
 }
+
 void Camera::setTarget(const glm::vec3& target)
 {
 	if (fpsCam)
 	{
-		glm::vec3 dir = glm::normalize( target- cameraPos);
+		glm::vec3 dir = glm::normalize(target - cameraPos);
 
-		targetPos = dir * glm::fvec1(FAR_FRUSTUM);
+		targetPos = cameraPos + dir * glm::fvec1(FAR_FRUSTUM);
+
+		forwardVec = glm::normalize(targetPos - cameraPos);
+		rightVec = glm::normalize(glm::cross(forwardVec, glm::vec3(0, 1, 0)));
 		return;
 	}
 
 	targetPos = target;
+	forwardVec = glm::normalize(targetPos - cameraPos);
+	rightVec = glm::normalize(glm::cross(forwardVec, glm::vec3(0, 1, 0)));
 }

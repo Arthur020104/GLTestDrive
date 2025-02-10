@@ -6,17 +6,17 @@ bool containsNaN3(const glm::vec3& vec)
 }
 glm::vec3 Light::getW(const glm::vec3& obj)
 {
-	glm::vec3 value;
+    glm::vec3 value;
 
-	if (isDirectional)
-	{
-		value =  glm::normalize(this->getPos());
-		return glm::length(value) > 0.0f ? value : glm::vec3(0.0f,0.0f,0.0f);
-	}
-	value = glm::normalize(this->getPos()- obj);
-
-	return glm::length(value) > 0.0f ? value : glm::vec3(0.0f, 0.0f, 0.0f);
+    if (isDirectional)
+    {
+        value = glm::normalize(this->getPos());
+        return glm::length(value) > 0.0f ? value : glm::vec3(0.0f,0.0f,0.0f);
+    }
+    value = glm::normalize(this->getPos() - obj);
+    return glm::length(value) > 0.0f ? value : glm::vec3(0.0f, 0.0f, 0.0f);
 }
+
 glm::vec3 Light::getColor()
 {
 	return color;
@@ -37,12 +37,13 @@ void Light::setPos(const glm::vec3& newPos)
 void Light::setRot(const glm::vec3& newRot)
 {
 	TransformController::setRot(newRot);
-	lightTransform.setRot(-newRot);
+	lightTransform.setRot(newRot);
 	if (lightsThatWereUpdated != nullptr)
 	{
 		lightsThatWereUpdated->insert(this);
 	}
 }
+
 void Light::setColor(const glm::vec3& newColor)
 {
 	color = newColor;
@@ -62,7 +63,7 @@ void Light::setModelMatixMode(const unsigned short& newModelMatrixMode)
 }
 void Light::prepareRender()
 {
-	GameObject::mustHaveRenderAtribb("prepareRender");
+	GameObject::mustHaveRenderAtribb("prepareRender");//rendering the light body MAKE THIS OPTIONAL
 	glBindVertexArray(VAO);
 	Shader* shaderProgramL = this->getShaderPointer();
 	shaderProgramL->use();

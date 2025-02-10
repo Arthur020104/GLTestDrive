@@ -24,6 +24,7 @@ public:
     // Métodos de gerenciamento de cena
     void render();
 
+
 private:
     // Vetor de objetos da cena
     std::vector<GameObject*> sceneObjs;
@@ -37,13 +38,24 @@ private:
     // Matriz de projeção
     glm::mat4 projectionMat;
 
-    // Caches para propriedades das luzes
-    std::vector<glm::vec3> lightsPosWorldCache;
-    std::vector<glm::vec3> lightsColorsCache;
-    std::vector<glm::vec3> lightsSpecularCache;
-    std::vector<glm::vec3> lightsDiffuseCache;
-    std::vector<glm::vec3> lightsAmbientCache;
-    std::vector<float> lightsIntensityCache;
+    struct LightsCache
+    {
+        glm::vec3 posWorldCache;
+        glm::vec3 colorsCache;
+        glm::vec3 specularCache;
+        glm::vec3 diffuseCache;
+        glm::vec3 ambientCache;
+        float intensityCache;
+        bool directionalCache;
+
+        glm::vec3 directionCache;
+        float cutOffCache;
+    };
+
+    // Instância da estrutura LightsCache
+    std::vector<LightsCache> lightsCache;
+    
+    
 
     std::set<Light*> lightsChanged;
 

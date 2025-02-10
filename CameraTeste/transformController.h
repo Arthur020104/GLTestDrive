@@ -11,9 +11,9 @@ public:
 	TransformController(glm::vec3 initialPos, glm::vec3 initialRot): objPos(initialPos), objRot(initialRot) {updateModelMatrix();}
 	glm::mat4 getModelMatrix();
 
-	glm::vec3 forward();
+	glm::vec3 getForward();
 
-	glm::vec3 right();
+	glm::vec3 getRight();
 
 	glm::vec3 getPos();
 	glm::vec3 getRot();
