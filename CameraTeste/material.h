@@ -9,7 +9,7 @@
 const float DEFAULT_ROUGHNESS = 500.0f;
 const int DEFAULT_SPECULAR_AMOUNT = 1;
 const glm::vec4 DEFAULT_COLOR = glm::vec4(0.3f, 0.3f, 0.5f, 1.0f);
-const glm::vec3 DEFAULT_AMBIENT = glm::vec3(0.3f, 0.3f, 0.3f);
+const glm::vec3 DEFAULT_AMBIENT = glm::vec3(0.2f, 0.2f, 0.2f);
 const int DEFAULT_DIFFUSE = 0;
 const int DEFAULT_EMISSION = 2;
 const glm::vec3 DEFAULT_SPECULAR_VEC = glm::vec3(DEFAULT_SPECULAR_AMOUNT);

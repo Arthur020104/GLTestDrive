@@ -17,13 +17,22 @@ const float DEFAULT_SPECULAR_FACTOR = 1.0f;
 const float DEFAULT_AMBIENT_FACTOR = 0.4f;
 const float DEFAULT_DIFFUSE_FACTOR = 1.0f;
 const TransformController DEFAULT_LIGHT_TRANSFORM = TransformController(DEFAULT_INICIAL_POS, DEFAULT_INICIAL_ROT);
-const float DEFAULT_CUT_OFF = 360.0f;//this is not what will be stored in the light, we store this glm::cos(glm::radians(DEFAULT_CUT_OFF))
-
+const float DEFAULT_CUT_OFF = 12.5f;//this is not what will be stored in the light, we store this glm::cos(glm::radians(DEFAULT_CUT_OFF))
+const float DEFAULT_OUTER_CUT_OFF = 17.5f;
 class Light : public GameObject
 {
 public:
     // Construtores
-    Light(const glm::vec3& inicialPos = DEFAULT_INICIAL_POS, const glm::vec3& inicialRot = DEFAULT_INICIAL_ROT, const glm::vec3& color = DEFAULT_LIGHT_COLOR,const bool isDirectional = DEFAULT_DIRECTIONAL,const float intensity = DEFAULT_INTENSITY, const float iCutOFF = DEFAULT_CUT_OFF, const bool isPointL = false, const glm::vec3& ambient = glm::vec3(-1.0f), const glm::vec3& diffuse = glm::vec3(-1.0f), const glm::vec3& specular = glm::vec3(-1.0f)) :GameObject(inicialPos, inicialRot), color(color), isDirectional(isDirectional), intensity(intensity), ambient(ambient.x < 0 ? DEFAULT_AMBIENT_FACTOR * color : ambient), diffuse(diffuse.x < 0 ? DEFAULT_DIFFUSE_FACTOR * color : diffuse), specular(specular.x < 0 ? DEFAULT_SPECULAR_FACTOR * color : specular), lightTransform(TransformController(inicialPos, inicialRot)), cutOff(glm::cos(glm::radians(iCutOFF))), isPoint(isPointL), direction(this->getForward()) {}
+    Light(const glm::vec3& inicialPos = DEFAULT_INICIAL_POS, const glm::vec3& inicialRot = DEFAULT_INICIAL_ROT, const glm::vec3& color = DEFAULT_LIGHT_COLOR,
+        const bool isDirectional = DEFAULT_DIRECTIONAL,const float intensity = DEFAULT_INTENSITY, const bool isPointL = false , const float iCutOFF = DEFAULT_CUT_OFF,
+        const float outerCutOffi = DEFAULT_OUTER_CUT_OFF, const glm::vec3& ambient = glm::vec3(-1.0f), const glm::vec3& diffuse = glm::vec3(-1.0f),
+        const glm::vec3& specular = glm::vec3(-1.0f))
+        :
+        GameObject(inicialPos, inicialRot), color(color), isDirectional(isDirectional), intensity(intensity), ambient(ambient.x < 0 ? DEFAULT_AMBIENT_FACTOR * color : ambient),
+        diffuse(diffuse.x < 0 ? DEFAULT_DIFFUSE_FACTOR * color : diffuse), specular(specular.x < 0 ? DEFAULT_SPECULAR_FACTOR * color : specular),
+        lightTransform(TransformController(inicialPos, inicialRot)), isPoint(isPointL), cutOff(glm::cos(glm::radians(iCutOFF))), outerCutOff(glm::cos(glm::radians(outerCutOffi))),
+        direction(this->getForward())
+        {}
 
     // Métodos públicos
     glm::vec3 getW(const glm::vec3& obj);
@@ -74,7 +83,9 @@ public:
 
     glm::vec3 getDirection() { return this->direction;  };
     void setDirection(glm::vec3 directionv) { this->direction = directionv; };
-    float getCutOff() const { return this->isPoint ? cutOff : -1.0f; };
+    float getCutOff() const { return this->isPoint ? this->cutOff : -1.0f; };
+
+    float getOuterCutOff() const{ return this->isPoint ? this->outerCutOff : -1.0f; };
 
 private:
     // Atributos privados
@@ -87,8 +98,11 @@ private:
     glm::vec3 diffuse;
     glm::vec3 specular;
     
+   
+
+    //Point Light, maybe create another class. First finish model loading
+    float cutOff;
+    float outerCutOff;
     bool isPoint;
     glm::vec3 direction;
-
-    float cutOff;
 };

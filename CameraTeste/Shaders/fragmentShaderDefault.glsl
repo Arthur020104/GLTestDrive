@@ -6,6 +6,7 @@ struct Light
     vec3 positionWorld;
     vec3 direction;
     float cutOff;
+    float outerCutOff;
 
     bool isDirectional;
     vec3 colorValue;
@@ -77,12 +78,15 @@ void CalculateLight()
         : normalize(lightVec);
 
         float theta = dot(lightDir, normalize(-lights[i].direction));
-    
-        if(theta <= lights[i].cutOff && !lights[i].isDirectional && lights[i].cutOff!= -1.0) 
+           
+        if(theta <= lights[i].outerCutOff && !lights[i].isDirectional && lights[i].cutOff!= -1.0) 
         {       
            continue;
         }
         
+        float epsilon  = lights[i].cutOff - lights[i].outerCutOff;
+        float pointLightInte = clamp( (theta - lights[i].outerCutOff ) / epsilon, 0.0, 1.0); 
+
 
         float lightDist = length(lightVec);
         float attenuation =  lights[i].isDirectional
@@ -101,8 +105,8 @@ void CalculateLight()
         if (!material.hasSpecularMap) 
             specularColor = vec3(material.specularMulti) * pow(max(dot(normal, halfwayDir), 0.0), material.brightness);
 
-        totalDiffuse += attenuation * lights[i].intensity * diffuseColor * lights[i].diffuse;
-        totalSpecular += attenuation * lights[i].intensity * lights[i].specular * specularColor;
+        totalDiffuse += attenuation * lights[i].intensity * diffuseColor * lights[i].diffuse * pointLightInte;
+        totalSpecular += attenuation * lights[i].intensity * lights[i].specular * specularColor * pointLightInte;
     }
 
     totalAmbientLight = vec3(texture(material.diffuse, aTextureCoord)) * material.ambient;

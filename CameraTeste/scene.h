@@ -50,6 +50,7 @@ private:
 
         glm::vec3 directionCache;
         float cutOffCache;
+        float outerCutOffCache;
     };
 
     // Instância da estrutura LightsCache

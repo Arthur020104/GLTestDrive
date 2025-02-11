@@ -81,6 +81,8 @@ void Scene :: updateElementCache(Light* element)
 
     lightsCache[index].directionCache = element->getDirection();
     lightsCache[index].cutOffCache = element->getCutOff();
+
+    lightsCache[index].outerCutOffCache = element->getOuterCutOff();
 }
 void Scene::updateLightsChangedCache()
 {
@@ -93,16 +95,14 @@ void Scene::updateLightsChangedCache()
 
 void Scene::render()
 {
-    if (lightsChanged.size() > 0)
-        updateLightsChangedCache();
-
-
     for (int i = 0; i < sceneObjs.size(); i++)
     {
         sceneObjs[i]->BeforeUpdate();
         sceneObjs[i]->Update();
         sceneObjs[i]->AftherUpdate();
     }
+    if (lightsChanged.size() > 0)
+        updateLightsChangedCache();
     for (int i = 0; i < sceneObjs.size(); i++) 
     {
         if (!sceneObjs[i]->hasRenderAtribs())
@@ -115,7 +115,7 @@ void Scene::render()
 
         glm::mat4 viewMatrix = mainCamera->getViewMatrix();
         glm::vec3 cameraPos = mainCamera->getPos();
-        this->updateLightsChangedCache();
+        //this->updateLightsChangedCache();
         if (i == 0 || sceneObjs[i - 1]->getShaderPointer() != sceneObjs[i]->getShaderPointer()) //instead of checking if the last object had the same shader, check if lights were set to any of the shaders this loop
         {
             Shader* shaderProgram = sceneObjs[i]->getShaderPointer();
@@ -137,6 +137,8 @@ void Scene::render()
 
                 shaderProgram->setFloat (baseName + ".cutOff", lightsCache[i].cutOffCache);
                 shaderProgram->setVec3(baseName + ".direction", lightsCache[i].directionCache);
+
+                shaderProgram->setFloat(baseName + ".outerCutOff", lightsCache[i].outerCutOffCache);
             }
             shaderProgram->setVec3("cameraPos", cameraPos);
             shaderProgram->setMat4("projection", projectionMat);

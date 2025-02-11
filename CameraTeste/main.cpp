@@ -553,14 +553,14 @@ int main()
     Light l4 = Light(glm::vec3(-240.0f, 10.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 0.2f);
     Light l5 = Light(glm::vec3(-330.0f, 100.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 0.2f);
     Light l6 = Light(glm::vec3(0.0f, 8.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.3f), false, 0.4f);
-    Light l7 = Light(glm::vec3(0.0f, 820.0f, 350.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.6f, 0.5f, 0.5f), false, 3.0f, 12.5f, true);
+    Light l7 = Light(glm::vec3(0.0f, 820.0f, 350.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.6f, 0.5f, 0.5f), false, 5.0f,true);
     Light l8 = Light(glm::vec3(180.0f, 50.0f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 0.2f);
     Light l9 = Light(glm::vec3(10.0f, 3.0f, -35.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 3.0f, 12.5f);
-    Light l10 = Light(glm::vec3(10000.0f, 10000.0f, 10000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), true, 1.5f);//fix object going full white
+    Light l10 = Light(glm::vec3(10000.0f, 10000.0f, 10000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), true, 0.5f);//fix object going full white
     Light* lights[10] = { &l1, &l2, &l3, &l4, &l5,&l6,&l7,&l8,&l9,&l10 };
     l9.setUpdateFunc(&l9Func);
     l7.setScale(glm::vec3(1.0f));
-    l7.setUpdateFunc(&followCamera);
+    l7.setAftherUpdateFunc(&followCamera);
     
     #pragma endregion
 
