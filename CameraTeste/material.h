@@ -1,15 +1,15 @@
-#pragma once
+ï»¿#pragma once
 #include <glm/glm/gtc/matrix_transform.hpp>
-// Implementação da biblioteca STB para carregar imagens
+// Implementaï¿½ï¿½o da biblioteca STB para carregar imagens
 #define STB_IMAGE_IMPLEMENTATION
 #include <iostream>
 #include "shader.h"
 
-// Valores padrão para as propriedades do Material
+// Valores padrï¿½o para as propriedades do Material
 const float DEFAULT_ROUGHNESS = 500.0f;
 const int DEFAULT_SPECULAR_AMOUNT = 1;
 const glm::vec4 DEFAULT_COLOR = glm::vec4(0.3f, 0.3f, 0.5f, 1.0f);
-const glm::vec3 DEFAULT_AMBIENT = glm::vec3(0.2f, 0.2f, 0.2f);
+const glm::vec3 DEFAULT_AMBIENT = glm::vec3(0.1f, 0.1f, 0.1f);
 const int DEFAULT_DIFFUSE = 0;
 const int DEFAULT_EMISSION = 2;
 const glm::vec3 DEFAULT_SPECULAR_VEC = glm::vec3(DEFAULT_SPECULAR_AMOUNT);
@@ -37,6 +37,7 @@ public:
     void setRepeatTexture(const bool& repeat) { this->repeatTexture = repeat; };
     void setRepeatTextureFactor(const glm::vec3& repeatFactor) { this->repeatTextureFactor = repeatFactor; };
     void setSpecularMulti(const float& multi) { this->specularMulti = multi; };
+
     //createDisable texture ;
     void UnbindMaterial();
 private:
@@ -56,7 +57,7 @@ private:
     int emission;
 
     glm::vec3 repeatTextureFactor = glm::vec3(1.0f);//this is mutiplied by the gameObjectScale
-    bool repeatTexture = true;
+    bool repeatTexture = false;
 
 
 
@@ -68,6 +69,6 @@ private:
 
 
     unsigned int generateTexture(const char* path);
-    
+
 };
 //void generateTexture(unsigned int& texture, const char* path);

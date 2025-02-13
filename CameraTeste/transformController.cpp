@@ -34,7 +34,7 @@ void TransformController::updateModelMatrix()
     }
     
 }
-void TransformController::setModelMatixMode(const unsigned short& newModelMatrixMode)
+void TransformController::setModelMatrixMode(const unsigned short& newModelMatrixMode)
 {
     if (newModelMatrixMode > 2)
     {

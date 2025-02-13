@@ -21,11 +21,19 @@
 //TODO remover  Light** lightArr, const int& sizeLightArr
 //Separar luz objs no constructor
 
-
-Scene::Scene(GameObject** objArr, const int& sizeObjArr, Camera* camera, const glm::mat4& projection)
+Scene::~Scene()
 {
-   
-   // return;
+    for (GameObject* obj : this->sceneObjs)
+    {
+        delete obj;
+    }
+    for (Light* light : this->sceneLights)
+    {
+        delete light;
+    }
+}
+Scene::Scene(GameObject** objArr, const int& sizeObjArr, Camera* camera, const glm::mat4& projection)
+{ 
     projectionMat = projection;
     mainCamera = camera;
 

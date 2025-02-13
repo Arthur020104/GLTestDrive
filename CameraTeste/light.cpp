@@ -52,10 +52,10 @@ void Light::setColor(const glm::vec3& newColor)
 		lightsThatWereUpdated->insert(this);
 	}
 }
-void Light::setModelMatixMode(const unsigned short& newModelMatrixMode)
+void Light::setModelMatrixMode(const unsigned short& newModelMatrixMode)
 {
-	TransformController::setModelMatixMode(newModelMatrixMode);
-	lightTransform.setModelMatixMode(newModelMatrixMode);
+	TransformController::setModelMatrixMode(newModelMatrixMode);
+	lightTransform.setModelMatrixMode(newModelMatrixMode);
 	if (lightsThatWereUpdated != nullptr)
 	{
 		lightsThatWereUpdated->insert(this);

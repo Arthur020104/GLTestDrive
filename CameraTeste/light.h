@@ -58,7 +58,7 @@ public:
     void setPos(const glm::vec3& newPos) override;
     void setRot(const glm::vec3& newRot) override;
     void setColor(const glm::vec3& newColor);
-    void setModelMatixMode(const unsigned short& newModelMatrixMode) override;
+    void setModelMatrixMode(const unsigned short& newModelMatrixMode) override;
     //  void setScale(const glm::vec3& newScale) override;
     void prepareRender() override;
 

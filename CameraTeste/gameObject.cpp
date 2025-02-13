@@ -25,7 +25,7 @@ GameObject::GameObject(const glm::vec3& inicialPos, const glm::vec3& inicialRot,
     isStaticObj = isStatic;
     
     enablePhysicalRepresentation(vertices, numVertices, shaderProgramRef);
-    enableTexturesCoords();
+    
 }
 void GameObject::enablePhysicalRepresentation(const float* vertices, const int& numVertices, Shader* shaderProgramRef)
 {
@@ -66,6 +66,7 @@ void GameObject::enablePhysicalRepresentation(const float* vertices, const int& 
     glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
+    enableTexturesCoords();
 }
 
 GameObject::~GameObject()
@@ -84,8 +85,8 @@ GameObject::~GameObject()
     }
     
 }
-void GameObject::enableTexturesCoords()
-    {
+void GameObject::enableTexturesCoords()// PROBLEM 4.0 [This is only for the current box rendering. When loading models, enableTextureCoords will receive arguments to make any texture work.]
+{
     float texture[] = {
         // Coordenadas de textura
         0.0f, 0.0f,
@@ -187,7 +188,7 @@ void GameObject::enableTexturesCoords()
 
    */
         glBindVertexArray(0);
-    }
+}
 void GameObject::prepareRender()
 {
     glBindVertexArray(VAO);

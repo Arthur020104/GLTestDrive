@@ -23,7 +23,7 @@ public:
 
     // Métodos de gerenciamento de cena
     void render();
-
+    ~Scene();
 
 private:
     // Vetor de objetos da cena

@@ -19,7 +19,6 @@
 #include <iostream>
 /** TODO:
 1. GameObject
-    2. Create function pointers for `beforeUpdate` and `afterUpdate`.
     3. Implement EBO optimization.
     4. Load data from files:
         4.0 Constructor should accept a file path instead of vertices and vertex count.
@@ -33,6 +32,27 @@
     Done for now;
 3. Create a default config file move the size of the window there default elements and everthing this is done to be easy to be set , maybe create
 **/
+
+
+
+
+
+
+
+/*
+* Focus points will be highlighted, for example this is the third function on the file and the second PROBLEM on this function
+* Named: PROBLEM 3.2 [DESCRIPTION]
+*/
+
+
+
+
+
+
+
+
+
+
 
 
 // Constantes de tempo e janela
@@ -441,17 +461,11 @@ int init(GLFWwindow** window)
     return 0;
 }
 /*******************/
-int main()
+Scene* prepareScene() 
 {
-
-    if (init(&Window) == -1)
-    {
-        return -1;
-    }
-    
-  
+    // Vertex data for a cube
     float vertices[] = {
-        // Posições
+        // Positions for 36 vertices (6 faces of 2 triangles each)
         -0.5f, -0.5f, -0.5f,
          0.5f, -0.5f, -0.5f,
          0.5f,  0.5f, -0.5f,
@@ -494,198 +508,166 @@ int main()
         -0.5f,  0.5f,  0.5f,
         -0.5f,  0.5f, -0.5f
     };
-
-    float texture[] = {
-        // Coordenadas de textura
-        0.0f, 0.0f,
-        1.0f, 0.0f,
-        1.0f, 1.0f,
-        1.0f, 1.0f,
-        0.0f, 1.0f,
-        0.0f, 0.0f,
-
-        0.0f, 0.0f,
-        1.0f, 0.0f,
-        1.0f, 1.0f,
-        1.0f, 1.0f,
-        0.0f, 1.0f,
-        0.0f, 0.0f,
-
-        1.0f, 0.0f,
-        1.0f, 1.0f,
-        0.0f, 1.0f,
-        0.0f, 1.0f,
-        0.0f, 0.0f,
-        1.0f, 0.0f,
-
-        1.0f, 0.0f,
-        1.0f, 1.0f,
-        0.0f, 1.0f,
-        0.0f, 1.0f,
-        0.0f, 0.0f,
-        1.0f, 0.0f,
-
-        0.0f, 1.0f,
-        1.0f, 1.0f,
-        1.0f, 0.0f,
-        1.0f, 0.0f,
-        0.0f, 0.0f,
-        0.0f, 1.0f,
-
-        0.0f, 1.0f,
-        1.0f, 1.0f,
-        1.0f, 0.0f,
-        1.0f, 0.0f,
-        0.0f, 0.0f,
-        0.0f, 1.0f
-    };
-
-    Shader DefaultShader("Shaders/vertexShaderDefault.glsl", "Shaders/fragmentShaderDefault.glsl");
-    Shader LightShader("Shaders/vertexShaderDefault.glsl", "Shaders/fragmentShaderLight.glsl");
-    DEFAULT_SHADER_REFERENCE = &DefaultShader;
     const unsigned int numVertices = sizeof(vertices) / sizeof(vertices[0]);
 
+    // Create shaders
+    Shader* defaultShader = new Shader("Shaders/vertexShaderDefault.glsl", "Shaders/fragmentShaderDefault.glsl");
+    Shader* lightShader = new Shader("Shaders/vertexShaderDefault.glsl", "Shaders/fragmentShaderLight.glsl");
+    DEFAULT_SHADER_REFERENCE = defaultShader; // Assuming this global is used elsewhere
 
-    #pragma region Lights
-    Light l1 = Light(glm::vec3(25.0f, 100.0f, -25.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.65f, 0.011f), false, 0.2f);
-    Light l2 = Light(glm::vec3(0.0f, 145.0f, -800.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.9f, 0.7f), false, 0.2f);
-    Light l3 = Light(glm::vec3(-10.0f, 10.0f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.8f, 0.8f, 1.0f), false, 0.2f);
-    Light l4 = Light(glm::vec3(-240.0f, 10.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 0.2f);
-    Light l5 = Light(glm::vec3(-330.0f, 100.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 0.2f);
-    Light l6 = Light(glm::vec3(0.0f, 8.0f, 240.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.3f), false, 0.4f);
-    Light l7 = Light(glm::vec3(0.0f, 820.0f, 350.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.6f, 0.5f, 0.5f), false, 5.0f,true);
-    Light l8 = Light(glm::vec3(180.0f, 50.0f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.8f, 0.6f), false, 0.2f);
-    Light l9 = Light(glm::vec3(10.0f, 3.0f, -35.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), false, 3.0f, 12.5f);
-    Light l10 = Light(glm::vec3(10000.0f, 10000.0f, 10000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), true, 0.5f);//fix object going full white
-    Light* lights[10] = { &l1, &l2, &l3, &l4, &l5,&l6,&l7,&l8,&l9,&l10 };
-    l9.setUpdateFunc(&l9Func);
-    l7.setScale(glm::vec3(1.0f));
-    l7.setAftherUpdateFunc(&followCamera);
-    
-    #pragma endregion
+    // Dynamically allocate only the required lights (light 7, 9, and 10)
+    Light* l7 = new Light
+    (
+        glm::vec3(0.0f, 820.0f, 350.0f),
+        glm::vec3(0.0f),
+        glm::vec3(0.6f, 0.5f, 0.5f),
+        false, 4.0f, true
+    );
+    Light* l9 = new Light
+    (
+        glm::vec3(10.0f, 3.0f, -35.0f),
+        glm::vec3(0.0f),
+        glm::vec3(1.0f),
+        false, 0.0f, 12.5f
+    );
+    Light* l10 = new Light
+    (
+        glm::vec3(10000.0f, 10000.0f, 10000.0f),
+        glm::vec3(0.0f),
+        glm::vec3(1.0f),
+        true, 0.1f
+    );
+    l9->setUpdateFunc(&l9Func);
+    l7->setScale(glm::vec3(1.0f));
+    l7->setAftherUpdateFunc(&followCamera);
 
-    #pragma region GameObjects
-    // Material(ambientV = DEFAULT_AMBIENT,diffuseV = DEFAULT_DIFFUSE,colorV = DEFAULT_COLOR,roughnessAmt = DEFAULT_ROUGHNESS,amtOfSpecular = DEFAULT_SPECULAR_AMOUNT)
-    //Material(const glm::vec4& colorV, const float& roughnessAmt, const float& amtOfSpecular)
-    Material veryShine(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f), 20.0f);
+    // Set up materials
+    const char* boxDiffusePath = "C:/Users/arthu/Downloads/container2.png";
+    const char* boxSpecularPath = "C:/Users/arthu/Downloads/container2_specular.png";
+ 
 
-    Material veryShineBlue(glm::vec4(0.0999f, 0.09991f, 0.35f, 1.0f), 20);
-    //Material(const glm::vec4& colorV, const float& roughnessAmt, const float& specularAmt, const glm::vec3& ambientV = DEFAULT_AMBIENT, const int& diffuseV = DEFAULT_DIFFUSE)
-    Material veryRoughGray(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 2);
-    Material BoxMat(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 50);
-    Material Box2(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 50);
-    Material GroundMat(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 1);
+    Material* boxMat = new Material(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 50);
+    boxMat->LoadDiffuseMap(boxDiffusePath);
+    boxMat->LoadSpecularMap(boxSpecularPath);
 
-    Material veryRoughBlue(glm::vec4(0.0999f, 0.09991f, 0.4f, 1.0f), 750);
 
-   
-    GameObject obj2 = GameObject(glm::vec3(-15.0f, 5.0f, -40.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
-    GameObject ground = GameObject(glm::vec3(0.0f, -5.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
+    // Create a vector to hold all scene objects (GameObjects and Lights)
+    std::vector<GameObject*> sceneObjects;
+   // sceneObjects.reserve(6 + 2 + 3 + 2); // Reserve for 6 boxes, 2 static objects, and 3 lights
 
-    const char* pathss = { "C:/Users/arthu/Downloads/container2.png" };
-    const char* paths = { "C:/Users/arthu/Downloads/container2_specular.png" };
-    const char* emissionMap = { "C:/Users/arthu/Downloads/matrix.jpg" };
-    const char* emissionMapGlowStone = { "C:/Users/arthu/source/repos/CameraTeste/CameraTeste/TextureImages/Glowstone.jpg" };
-    const char* groundTexture = { "C:/Users/arthu/Downloads/aerial_rocks_02_2k.blend/textures/aerial_rocks_02_diff_2k.jpg" };
-
-    BoxMat.LoadDiffuseMap(pathss);
-    BoxMat.LoadSpecularMap(paths);
-   // Box.LoadEmissionMap(emissionMap);
-    //Box.setRepeatTextureFactor(glm::vec3(0.3f));
-   // Box.setRepeatTexture(false);
+    // Create 6 box objects in a circular layout
     constexpr float DEG2RAD = glm::pi<float>() / 180.0f;
-
     float angleIncrement = 60.0f;
-    const int OFFSET = 3;
-
-    // Vector for all scene objects
-    std::vector<GameObject*> arr;
-    arr.reserve(OFFSET + 10 + 6);  // Reserve space for efficiency
-
-    // Create and configure the box objects
     for (int i = 0; i < 6; ++i) 
     {
-        // Calculate position offset in a circular layout
         float angle = i * angleIncrement * DEG2RAD;
-        glm::vec3 offset = glm::vec3(5.0f * glm::cos(angle), 2.0f, -40.0f + 5.0f * glm::sin(angle));
-
-        // Set up individual GameObjects
-        GameObject* boxObj = new GameObject(offset, glm::vec3(0.0f, angle * 30.0f, 0.0f), vertices, numVertices, &DefaultShader, true);
-
-        boxObj->setScale(boxObj->getScale() * glm::fvec1(1));
-        boxObj->setMaterial(&BoxMat);
-        boxObj->setUpdateFunc(&objUpdate);
-        boxObj->setAftherUpdateFunc(&objAftherUpdate);
-
-        // Add the box to the scene list
-        arr.push_back(boxObj);
+        glm::vec3 position = glm::vec3(5.0f * glm::cos(angle), 1.0f, 5.0f * glm::sin(angle));
+        glm::vec3 rotation = glm::vec3(0.0f, angle * 30.0f, 0.0f);
+        GameObject* box = new GameObject(position, rotation, vertices, numVertices, defaultShader, true);
+        box->setMaterial(boxMat);
+        box->setUpdateFunc(&objUpdate);
+        box->setAftherUpdateFunc(&objAftherUpdate);
+        sceneObjects.push_back(box);
     }
 
-    // Setup additional objects (ground and obj2)
-    obj2.setScale(obj2.getScale() * glm::fvec1(1));
-    obj2.setMaterial(&Box2);
-    ground.setMaterial(&GroundMat);
-    ground.setScale(glm::vec3(300.0f, 0.3f, 300.0f));
-    GroundMat.LoadDiffuseMap(groundTexture);
-    GroundMat.setSpecularMulti(0.1f);
-    GroundMat.setRepeatTextureFactor(glm::vec3(0.05f));
+    // Create additional static objects: obj2 and ground
+    GameObject* obj2 = new GameObject
+    (
+        glm::vec3(-15.0f, 5.0f, -40.0f),
+        glm::vec3(0.0f),
+        vertices,
+        numVertices,
+        defaultShader,
+        true
+    );
+    obj2->setMaterial(boxMat);  // Using the same material for simplicity
+    sceneObjects.push_back(obj2);
 
-    // Add static objects to the scene list
-    arr.push_back(&obj2);
-    arr.push_back(&ground);
 
-    // Add lights to the scene list
-    for (int i = 0; i < 10; i++) {
-        lights[i]->enablePhysicalRepresentation(vertices, numVertices, &LightShader);
-        //lights[i]->setScale(lights[i]->getScale() * glm::fvec1(lights[i]->getIntensity() / 20));
-        if(lights[i]->getIsDirectional())
-            lights[i]->setScale(lights[i]->getScale() * glm::fvec1(1000));
-        // Add lights to the scene list
-        arr.push_back(lights[i]);
+
+    // Add the dynamically allocated lights to the scene
+    sceneObjects.push_back(l7);
+    sceneObjects.push_back(l9);
+    sceneObjects.push_back(l10);
+
+    /*House*/
+
+    //Material* boxMat = new Material(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 50);
+    //
+    const char* woodDiffusePath = "C:/Users/arthu/Downloads/1ky60nq9nh091.png";
+    Material* woodMat = new Material(glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), 10);
+    woodMat->setSpecularMulti(0.3f);
+    woodMat->setRepeatTexture(true);
+    woodMat->setRepeatTextureFactor(glm::vec3(0.3,0.3,1));
+    woodMat->LoadDiffuseMap(woodDiffusePath);
+    const float multiFHouse = 65.0f;
+
+    GameObject* wall1 = new GameObject(glm::vec3(multiFHouse / 2, multiFHouse / 4,0),glm::vec3(0,90,0), vertices, numVertices, defaultShader, true);
+    wall1->setScale(wall1->getScale() * glm::vec3(multiFHouse, multiFHouse/2,1.0f));
+    GameObject* wall2 = new GameObject(glm::vec3(-multiFHouse / 2, multiFHouse / 4, 0), glm::vec3(0, 90, 0), vertices, numVertices, defaultShader, true);
+    wall2->setScale(wall2->getScale() * glm::vec3(multiFHouse, multiFHouse/2, 1.0f));
+    GameObject* wall3 = new GameObject(glm::vec3(0, multiFHouse / 4, multiFHouse/2), glm::vec3(0, 0, 0), vertices, numVertices, defaultShader, true);
+    wall3->setScale(wall3->getScale() * glm::vec3(multiFHouse, multiFHouse / 2, 1.0f));
+    GameObject* wall4 = new GameObject(glm::vec3(0, multiFHouse / 4, -multiFHouse / 2), glm::vec3(0, 0, 0), vertices, numVertices, defaultShader, true);
+    wall4->setScale(wall4->getScale() * glm::vec3(multiFHouse, multiFHouse / 2, 1.0f));
+    GameObject* wall5 = new GameObject(glm::vec3(0, 0,0), glm::vec3(90, 0, 0), vertices, numVertices, defaultShader, true);
+    wall5->setScale(wall5->getScale() * glm::vec3(multiFHouse, multiFHouse, 1.0f));
+    GameObject* wall6 = new GameObject(glm::vec3(0, multiFHouse/2, 0), glm::vec3(90, 0, 0), vertices, numVertices, defaultShader, true);
+    wall6->setScale(wall6->getScale() * glm::vec3(multiFHouse, multiFHouse, 1.0f));
+    wall1->setMaterial(woodMat);
+    wall2->setMaterial(woodMat);
+    wall3->setMaterial(woodMat);
+    wall4->setMaterial(woodMat);
+    wall5->setMaterial(woodMat);
+    wall6->setMaterial(woodMat);
+
+
+    sceneObjects.push_back(wall1);
+    sceneObjects.push_back(wall2);
+    sceneObjects.push_back(wall3);
+    sceneObjects.push_back(wall4);
+    sceneObjects.push_back(wall5);
+    sceneObjects.push_back(wall6);
+     /*House*/
+
+
+    // Create the scene. Assumes that 'cameraInst' and 'PROJECTION' are defined elsewhere.
+    Scene* mainScene = new Scene(sceneObjects.data(), sceneObjects.size(), &cameraInst, PROJECTION);
+    return mainScene;
+}
+
+int main()
+{
+
+    if (init(&Window) == -1)
+    {
+        return -1;
     }
-
-    // Set the model matrix mode for l2
-    l2.setModelMatixMode(1); // Rotate around origin
-
-    // Scene setup
+    
     float lightSpeed = -55.0f;
-    Scene mainScene(arr.data(), arr.size(), &cameraInst, PROJECTION);
+    Scene* main = prepareScene();
 
 
     while (!glfwWindowShouldClose(Window))
     {
        
        
-        glClearColor(0.1f, 0.1f, 0.3f, 0.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         float timeValue = glfwGetTime();
         DeltaTime = timeValue - LastTime;
         LastTime = timeValue;
             
-        l2.setRot(l2.getRot() + glm::vec3(100.0f * DeltaTime,0.0f, 0.0f));
-
 
         fpsLog();
 
 
         keyInput();
         cameraMovement();
-        // Check position and adjust speed direction
-        if (l1.getPos().z <= -150.0f && lightSpeed < 0)
-        {
-            lightSpeed *= -1; // Reverse direction when hitting the lower bound
-        }
-        else if (l1.getPos().z >= -30.0f && lightSpeed > 0)
-        {
-            lightSpeed *= -1; // Reverse direction when hitting the upper bound
-        }
+        
 
-        // Update the position with the adjusted speed
-        l1.setPos(l1.getPos() + glm::vec3(0.0f, 0.0f, DeltaTime * lightSpeed));
-
-
-        mainScene.render();
+        main->render();
         processInput(Window);
 
 
@@ -693,16 +675,9 @@ int main()
         glfwPollEvents();
 
     }
-    for (int i = 0; i < 6; i++)
-    {
-        delete arr[i];
-    }
 
     glfwTerminate();
-   /* for (int i = 3; i < 13; i++)
-    {
-        delete arr[i];
-    }*/
+  
     return 0;
 }
 

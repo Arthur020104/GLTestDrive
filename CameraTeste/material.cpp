@@ -77,7 +77,7 @@ void Material::LoadMaterialDataToShader(Shader* s, glm::vec3 scale)
 
     s->setBool("material.repeatTexture", this->repeatTexture);
 
- 
+
     s->setVec3("material.repeatTextureFactor", this->repeatTextureFactor * scale);
 
 
@@ -131,7 +131,7 @@ unsigned int Material::generateTexture(const char* path)
     else if (nrChannels == 2) format = GL_RG;
     else if (nrChannels == 3) format = GL_RGB;
     else if (nrChannels == 4) format = GL_RGBA;
-    else 
+    else
     {
         std::cerr << "Unsupported texture format: " << nrChannels << " channels.\n";
         stbi_image_free(data);
@@ -165,7 +165,7 @@ void Material::LoadDiffuseMap(const char* path)
         this->diffuseMap = texture;
         hasDiffuseMap = true;
     }
-   
+
 }
 void Material::LoadSpecularMap(const char* path)
 {
